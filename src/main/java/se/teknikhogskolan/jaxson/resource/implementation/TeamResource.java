@@ -32,7 +32,7 @@ public class TeamResource {
 
     @GET
     @Path("{id}/users")
-    public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") Boolean asLocations) {
+    public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations) {
         List<UserModel> userModels = userModelsFromUsers(userService.getAllByTeamId(id));
         if (asLocations) {
             List<String> uris = new ArrayList<>();
