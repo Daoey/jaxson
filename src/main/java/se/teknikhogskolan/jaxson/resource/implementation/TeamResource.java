@@ -32,13 +32,12 @@ public class TeamResource {
 
     @GET
     @Path("{id}/users")
-    public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations) {
+    public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") Boolean asLocations) {
         List<UserModel> userModels = userModelsFromUsers(userService.getAllByTeamId(id));
         if (asLocations) {
-            List<URI> uris = new ArrayList<>();
-            UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
-            userModels.forEach(u -> uris.add(uriBuilder.path(u.getId().toString()).build()));
-            return Response.ok(uris.toString()).build();
+            List<String> uris = new ArrayList<>();
+            userModels.forEach(u -> uris.add(String.format("../users/%d", u.getId())));
+            return Response.ok(uris).build();
         }
         return Response.ok(userModels).build();
     }
