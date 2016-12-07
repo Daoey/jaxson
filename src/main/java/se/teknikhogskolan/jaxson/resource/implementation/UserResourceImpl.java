@@ -17,7 +17,7 @@ public class UserResourceImpl implements UserResource{
         User createdUser = userService.create(user.getUserNumber(), user.getUsername(),
                 user.getFirstName(), user.getLastName());
 
-        return new UserModel(createdUser.getUserNumber(), createdUser.getUsername(),
+        return new UserModel(createdUser.getId(), createdUser.getUserNumber(), createdUser.getUsername(),
                 createdUser.getFirstName(), createdUser.getLastName());
     }
 

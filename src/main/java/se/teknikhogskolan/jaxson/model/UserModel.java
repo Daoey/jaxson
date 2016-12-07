@@ -4,24 +4,31 @@ import java.util.Collection;
 
 public final class UserModel extends AbstractEntity{
 
+    private Long id;
     private Long userNumber;
     private String username;
     private String firstName;
     private String lastName;
     private boolean active;
-    private Team team;
+    private Long teamId;
     private Collection<WorkItem> workItems;
 
     protected UserModel() {
     }
 
-    public UserModel(Long userNumber, String username, String firstName, String lastName) {
+    public UserModel(Long id, Long userNumber, String username, String firstName, String lastName) {
+        this.id = id;
         this.userNumber = userNumber;
         this.username = username;
         this.firstName = firstName;
         this.lastName = lastName;
-        this.team = null;
+        this.teamId = null;
         this.active = true;
+    }
+
+    @Override
+    public Long getId() {
+        return id;
     }
 
     public Long getUserNumber() {
@@ -60,12 +67,12 @@ public final class UserModel extends AbstractEntity{
         return this;
     }
 
-    public Team getTeam() {
-        return team;
+    public Long getTeamId() {
+        return teamId;
     }
 
-    public UserModel setTeam(Team team) {
-        this.team = team;
+    public UserModel setTeamId(Long teamModel) {
+        this.teamId = teamModel;
         return this;
     }
 
@@ -116,7 +123,7 @@ public final class UserModel extends AbstractEntity{
         builder.append(", lastName=");
         builder.append(lastName == null ? "null" : lastName);
         builder.append(", teamId=");
-        //builder.append(team == null ? "null" : team.getId());
+        //builder.append(teamId == null ? "null" : teamId.getId());
         builder.append(", workItemsSize=");
         builder.append(workItems == null ? "0" : workItems.size());
         builder.append(", active=");
