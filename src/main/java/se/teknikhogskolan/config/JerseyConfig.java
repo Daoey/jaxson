@@ -11,6 +11,7 @@ import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 import javax.ws.rs.ApplicationPath;
 
 @Component
+@ApplicationPath("jaxson")
 public final class JerseyConfig extends ResourceConfig{
 
     public JerseyConfig() {
