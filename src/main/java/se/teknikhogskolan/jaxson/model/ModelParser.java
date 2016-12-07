@@ -18,9 +18,7 @@ public class ModelParser {
 
     public static List<UserModel> userModelsFromUsers(List<User> users) {
         List<UserModel> userModels = new ArrayList<>();
-        users.forEach(u -> {
-            userModels.add(userModelFrom(u));
-        });
+        users.forEach(u -> userModels.add(userModelFrom(u)));
         return userModels;
     }
 
