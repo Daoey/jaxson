@@ -6,6 +6,7 @@ import se.teknikhogskolan.model.WorkItem;
 import se.teknikhogskolan.resource.IssueResource;
 import se.teknikhogskolan.resource.TeamResource;
 import se.teknikhogskolan.resource.UserResource;
+import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
 import javax.ws.rs.ApplicationPath;
 
@@ -17,5 +18,6 @@ public final class JerseyConfig extends ResourceConfig{
         register(WorkItem.class);
         register(IssueResource.class);
         register(UserResource.class);
+        register(WorkItemService.class);
     }
 }
