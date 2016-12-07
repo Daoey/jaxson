@@ -10,7 +10,6 @@ import se.teknikhogskolan.resource.UserResource;
 import javax.ws.rs.ApplicationPath;
 
 @Component
-@ApplicationPath("jaxson")
 public final class JerseyConfig extends ResourceConfig{
 
     public JerseyConfig() {

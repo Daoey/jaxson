@@ -11,13 +11,6 @@
 	<name>jaxson</name>
 	<description>Jax RS school project</description>
 
-	<repositories>
-		<repository>
-			<id>jitpack.io</id>
-			<url>https://jitpack.io</url>
-		</repository>
-	</repositories>
-
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
@@ -33,22 +26,26 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.github.Daoey</groupId>
-			<artifactId>springcasemanagement</artifactId>
-			<version>84cb928f01</version>
+			<groupId>se.teknikhogskolan.springcasemanagement</groupId>
+			<artifactId>spring-case-management</artifactId>
+			<version>0.1.0</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-jersey</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-	</dependencies>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+            <version>1.9.6.RELEASE</version>
+        </dependency>
+    </dependencies>
 
 	<build>
 		<plugins>
