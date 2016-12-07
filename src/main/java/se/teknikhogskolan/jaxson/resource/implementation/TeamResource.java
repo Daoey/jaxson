@@ -37,9 +37,7 @@ public class TeamResource {
         if (asLocations) {
             List<URI> uris = new ArrayList<>();
             UriBuilder uriBuilder = uriInfo.getAbsolutePathBuilder();
-            userModels.forEach(u -> {
-                uris.add(uriBuilder.path(u.getId().toString()).build());
-            });
+            userModels.forEach(u -> uris.add(uriBuilder.path(u.getId().toString()).build()));
             return Response.ok(uris.toString()).build();
         }
         return Response.ok(userModels).build();
