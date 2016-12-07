@@ -31,7 +31,19 @@ public abstract class AbstractEntity {
     public LocalDate getLastModified() {
         return lastModified;
     }
-    
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public void setCreated(LocalDate created) {
+        this.created = created;
+    }
+
+    public void setLastModified(LocalDate lastModified) {
+        this.lastModified = lastModified;
+    }
+
     public String lastModifiedToString() {
         return this.lastModified == null ? "null" : lastModified.toString();
     }

@@ -16,7 +16,8 @@ public class ModelParser {
         return new TeamModel(team.getId(), team.getName(), users, team.isActive());
     }
 
-    public static List<UserModel> userModelsFromUsers(List<User> users) {
+    //TODO delete
+/*    public static List<UserModel> userModelsFromUsers(List<User> users) {
         List<UserModel> userModels = new ArrayList<>();
         users.forEach(u -> userModels.add(userModelFrom(u)));
         return userModels;
@@ -31,5 +32,5 @@ public class ModelParser {
         userModel.setTeamId(null == user.getTeam() ? null : user.getTeam().getId());
         userModel.setActive(user.isActive());
         return userModel;
-    }
+    }*/
 }

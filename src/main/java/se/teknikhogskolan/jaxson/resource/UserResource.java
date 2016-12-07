@@ -1,6 +1,7 @@
 package se.teknikhogskolan.jaxson.resource;
 
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -32,8 +33,8 @@ public interface UserResource {
     UserModel updateUser(@PathParam("userNumber") Long userNumber, UserModel user);
 
     @GET
-    List<UserModel> getUserByParameter(@QueryParam("username") String username, @QueryParam("firstname") String firstname,
-                                       @QueryParam("lastname") String lastname);
+    List<UserModel> getUserByParameter(@QueryParam("username") @DefaultValue("") String username, @QueryParam("firstname") @DefaultValue("") String firstname,
+                                       @QueryParam("lastname") @DefaultValue("") String lastname);
 
     /* TODO
     *  Activate and inactive user

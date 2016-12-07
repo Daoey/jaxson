@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static se.teknikhogskolan.jaxson.model.ModelParser.teamModelFrom;
-import static se.teknikhogskolan.jaxson.model.ModelParser.userModelsFromUsers;
 
 @Path("teams")
 @Produces(MediaType.APPLICATION_JSON)
@@ -33,7 +32,8 @@ public class TeamResource {
     @GET
     @Path("{id}/users")
     public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations) {
-        List<UserModel> userModels = userModelsFromUsers(userService.getAllByTeamId(id));
+        List<UserModel> userModels = new ArrayList<>();
+        userService.getAllByTeamId(id).forEach(user -> userModels.add(new UserModel(user)));
         if (asLocations) {
             List<String> uris = new ArrayList<>();
             userModels.forEach(u -> uris.add(String.format("../users/%d", u.getId())));
