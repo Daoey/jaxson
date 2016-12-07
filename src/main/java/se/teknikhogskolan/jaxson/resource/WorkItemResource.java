@@ -8,6 +8,7 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -22,13 +23,15 @@ public interface WorkItemResource {
     Response createWorkItem(WorkItemModel workItem);
     
     @GET
+    Response getWorkItems(@QueryParam("page") int page, @QueryParam("size") int size);
+    
+    @GET
     @Path("{id}")
     Response getWorkItem(@PathParam("id") Long id);
 
     @PUT
     @Path("{id}")
     Response updateWorkItem(@PathParam("id") Long id, WorkItemModel workItem);
-    
     
     @DELETE
     @Path("{id}")

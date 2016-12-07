@@ -1,6 +1,8 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -12,6 +14,7 @@ import se.teknikhogskolan.jaxson.model.WorkItemModel;
 import se.teknikhogskolan.jaxson.resource.WorkItemResource;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
+import se.teknikhogskolan.springcasemanagement.service.wrapper.Piece;
 
 public final class WorkItemResourceImpl implements WorkItemResource {
 
@@ -40,6 +43,17 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         WorkItem workItem = workItemService.getById(id);
         WorkItemModel workItemModel = new WorkItemModel(workItem);
         return Response.ok(workItemModel).build();
+    }
+    
+    @Override
+    public Response getWorkItems(int page, int pageSize) {
+        Piece<WorkItem> piece = workItemService.getAllByPage(page, pageSize);
+        List<WorkItem> workItemDaos = piece.getContent();
+        List<WorkItemModel> workItems = new ArrayList<WorkItemModel>();
+        for(WorkItem w : workItemDaos) {
+            workItems.add(new WorkItemModel(w));
+        }
+        return Response.ok(workItems).build();
     }
 
     @Override
