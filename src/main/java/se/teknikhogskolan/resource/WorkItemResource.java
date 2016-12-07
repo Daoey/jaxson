@@ -15,7 +15,7 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.net.URI;
 
-@Component
+/*@Component
 @Path("workitems")
 public final class WorkItemResource {
 
@@ -40,4 +40,4 @@ public final class WorkItemResource {
             return Response.ok("asdgasdgsdg").build();
         }
     }
-}
+}*/
