@@ -1,4 +1,4 @@
-package se.teknikhogskolan.resource;
+package se.teknikhogskolan.jaxson.resource.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.springcasemanagement.model.Team;

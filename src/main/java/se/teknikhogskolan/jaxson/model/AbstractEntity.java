@@ -1,4 +1,4 @@
-package se.teknikhogskolan.model;
+package se.teknikhogskolan.jaxson.model;
 
 import java.time.LocalDate;
 

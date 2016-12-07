@@ -1,11 +1,12 @@
-package se.teknikhogskolan.config;
+package se.teknikhogskolan.jaxson.config;
 
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
-import se.teknikhogskolan.model.WorkItem;
-import se.teknikhogskolan.resource.IssueResource;
-import se.teknikhogskolan.resource.TeamResource;
-import se.teknikhogskolan.resource.UserResourceImpl;
+
+import se.teknikhogskolan.jaxson.model.WorkItem;
+import se.teknikhogskolan.jaxson.resource.implementation.IssueResource;
+import se.teknikhogskolan.jaxson.resource.implementation.TeamResource;
+import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
 import javax.ws.rs.ApplicationPath;

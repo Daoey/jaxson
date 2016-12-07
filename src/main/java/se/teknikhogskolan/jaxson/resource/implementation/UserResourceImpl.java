@@ -1,8 +1,9 @@
-package se.teknikhogskolan.resource;
+package se.teknikhogskolan.jaxson.resource.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import se.teknikhogskolan.model.UserModel;
-import se.teknikhogskolan.resource.interfaces.UserResource;
+
+import se.teknikhogskolan.jaxson.model.UserModel;
+import se.teknikhogskolan.jaxson.resource.interfaces.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 
