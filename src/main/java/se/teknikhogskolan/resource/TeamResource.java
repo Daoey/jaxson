@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 
-import javax.inject.Qualifier;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
