@@ -1,4 +1,4 @@
-package se.teknikhogskolan.jaxson.resource.interfaces;
+package se.teknikhogskolan.jaxson.resource;
 
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
