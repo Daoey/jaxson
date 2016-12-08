@@ -21,10 +21,10 @@ public interface WorkItemResource {
 
     @POST
     Response createWorkItem(WorkItemModel workItem);
-    
+
     @GET
     Response getWorkItems(@QueryParam("page") int page, @QueryParam("size") int size);
-    
+
     @GET
     @Path("{id}")
     Response getWorkItem(@PathParam("id") Long id);
@@ -32,9 +32,10 @@ public interface WorkItemResource {
     @PUT
     @Path("{id}")
     Response updateWorkItem(@PathParam("id") Long id, WorkItemModel workItem);
-    
+
     @DELETE
     @Path("{id}")
-    Response deleteWorkItem(@PathParam("id") Long id);
-    
+    Response deleteWorkItem(@PathParam("id") Long id,
+            @QueryParam("deleteOnlyAssignedIssue") Boolean deleteOnlyAssignedIssue);
+
 }

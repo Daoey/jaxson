@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,9 +26,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     private UriInfo uriInfo;
 
     /*
-     * Content type: json Body:
-     * 
-     * { "description": "some value" }
+     * JSON body for creating a workItem { "description": "some value" }
      */
 
     @Override
@@ -56,21 +55,36 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         return Response.ok(workItems).build();
     }
 
+    /*
+     * JSON body for changing a workItem status/userNumber
+     * 
+     * {"status": "STARTED", "userNumber": 1 }
+     * 
+     */
     @Override
     public Response updateWorkItem(Long id, WorkItemModel workItem) {
         if (workItem.getUserNumber() != null) {
-            workItemService.setUser(workItem.getUserNumber(), workItem.getId());
+            workItemService.setUser(workItem.getUserNumber(), id);
         }
         if (workItem.getStatus() != null) {
-            workItemService.setStatus(workItem.getId(), workItem.getStatus());
+            workItemService.setStatus(id, workItem.getStatus());
+        }
+        if (workItem.getIssueId() != null) {
+            workItemService.addIssueToWorkItem(workItem.getIssueId(), id);
         }
         return Response.ok().build();
     }
 
     @Override
-    public Response deleteWorkItem(Long id) {
-        // TODO Auto-generated method stub
-        return null;
+    public Response deleteWorkItem(Long id, Boolean deleteOnlyAssignedIssue) {
+
+        if (deleteOnlyAssignedIssue.equals(Boolean.TRUE)) {
+            workItemService.removeIssueFromWorkItem(id);
+        } else {
+            workItemService.removeById(id);
+        }
+        
+        return Response.status(Status.NO_CONTENT).build();
     }
 
 }
