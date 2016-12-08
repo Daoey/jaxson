@@ -1,9 +1,9 @@
 package se.teknikhogskolan.jaxson.model;
 
 import se.teknikhogskolan.springcasemanagement.model.Team;
-import se.teknikhogskolan.springcasemanagement.model.User;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ModelParser {
@@ -16,21 +16,9 @@ public class ModelParser {
         return new TeamModel(team.getId(), team.getName(), users, team.isActive());
     }
 
-    //TODO delete
-/*    public static List<UserModel> userModelsFromUsers(List<User> users) {
-        List<UserModel> userModels = new ArrayList<>();
-        users.forEach(u -> userModels.add(userModelFrom(u)));
-        return userModels;
+    public static Collection<TeamModel> teamModelsFromTeams(Iterable<Team> teams) {
+        Collection<TeamModel> teamModels = new ArrayList<>();
+        teams.forEach(u -> teamModels.add(teamModelFrom(u)));
+        return teamModels;
     }
-
-    public static UserModel userModelFrom(User user) {
-        UserModel userModel = new UserModel(user.getId(),
-                                            user.getUserNumber(),
-                                            user.getUsername(),
-                                            user.getFirstName(),
-                                            user.getLastName());
-        userModel.setTeamId(null == user.getTeamId() ? null : user.getTeamId().getId());
-        userModel.setActive(user.isActive());
-        return userModel;
-    }*/
 }

@@ -13,9 +13,11 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static se.teknikhogskolan.jaxson.model.ModelParser.teamModelFrom;
+import static se.teknikhogskolan.jaxson.model.ModelParser.teamModelsFromTeams;
 
 @Path("teams")
 @Produces(MediaType.APPLICATION_JSON)
@@ -46,9 +48,17 @@ public class TeamResource {
 
     @GET
     public Response getTeam(@QueryParam("id") Long id) {
-        Team team = teamService.getById(id);
-        TeamModel teamModel = teamModelFrom(team);
-        return Response.ok(teamModel).build();
+        if (weHaveA(id)) {
+            Team team = teamService.getById(id);
+            TeamModel teamModel = teamModelFrom(team);
+            return Response.ok(teamModel).build();
+        }
+        Collection<TeamModel> teamModels = teamModelsFromTeams(teamService.getAll());
+        return Response.ok(teamModels).build();
+    }
+
+    private boolean weHaveA(Object o) {
+        return null != o;
     }
 
     @POST
