@@ -14,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserModel;
 
@@ -46,8 +47,12 @@ public interface UserResource {
 
     @GET
     List<UserModel> getAllByPage(@BeanParam PageRequestBean pageRequestBean);
+
+    @GET
+    @Path("creation")
+    List<UserModel> getByCreationDate(@BeanParam DateRequestBean dateRequestBean);
+
     /* TODO
-    *  Activate and inactive user
-    *  Get all by creationDate
+    *  Activate
     * */
 }
