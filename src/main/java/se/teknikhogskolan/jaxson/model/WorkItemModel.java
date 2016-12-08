@@ -1,7 +1,5 @@
 package se.teknikhogskolan.jaxson.model;
 
-import java.time.LocalDate;
-
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 
@@ -11,29 +9,34 @@ public final class WorkItemModel extends AbstractModel {
 
     private Status status;
 
-    private LocalDate completionDate;
+    private String completionDate;
 
-    private Issue issue;
+    private Long issueId;
 
     private Long userId;
-    
+
     private Long userNumber;
 
     protected WorkItemModel() {
     }
 
     public WorkItemModel(WorkItem workItem) {
+        
         setId(workItem.getId());
         setCreated(workItem.getCreated());
         setLastModified(workItem.getLastModified());
         description = workItem.getDescription();
-        completionDate = workItem.getCompletionDate();
+        completionDate = workItem.getCompletionDate().format(formatter);
         status = workItem.getStatus();
+        
         if (workItem.getUser() != null) {
             userId = workItem.getUser().getId();
             userNumber = workItem.getUser().getUserNumber();
         }
-        // issue = new IssueModel(issue.getIssue());
+        
+        if (workItem.getIssue() != null) {
+            issueId = workItem.getIssue().getId();
+        }
     }
 
     public WorkItemModel(String description) {
@@ -48,18 +51,18 @@ public final class WorkItemModel extends AbstractModel {
         return status;
     }
 
-    public LocalDate getCompletionDate() {
+    public String getCompletionDate() {
         return completionDate;
     }
 
-    public Issue getIssue() {
-        return issue;
+    public Long getIssueId() {
+        return issueId;
     }
 
     public Long getUserId() {
         return userId;
     }
-    
+
     public Long getUserNumber() {
         return userNumber;
     }
