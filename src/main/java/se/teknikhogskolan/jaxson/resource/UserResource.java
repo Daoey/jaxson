@@ -1,6 +1,8 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -12,6 +14,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserModel;
 
 import java.util.List;
@@ -33,12 +36,18 @@ public interface UserResource {
     UserModel updateUser(@PathParam("userNumber") Long userNumber, UserModel user);
 
     @GET
+    @Path("search")
     List<UserModel> getUserByParameter(@QueryParam("username") @DefaultValue("") String username, @QueryParam("firstname") @DefaultValue("") String firstname,
                                        @QueryParam("lastname") @DefaultValue("") String lastname);
 
+    @DELETE
+    @Path("{userNumber}")
+    UserModel deleteUser(@PathParam("userNumber") Long userNumber);
+
+    @GET
+    List<UserModel> getAllByPage(@BeanParam PageRequestBean pageRequestBean);
     /* TODO
     *  Activate and inactive user
-    *  Get all by page
     *  Get all by creationDate
     * */
 }
