@@ -1,6 +1,7 @@
 package se.teknikhogskolan.jaxson.model;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 import javax.persistence.Column;
 import javax.persistence.EntityListeners;
@@ -12,23 +13,25 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-public abstract class AbstractEntity {
+public abstract class AbstractModel {
+
+    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private Long id;
 
-    private LocalDate created;
+    private String created;
 
-    private LocalDate lastModified;
+    private String lastModified;
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    public LocalDate getLastModified() {
+    public String getLastModified() {
         return lastModified;
     }
 
@@ -37,18 +40,10 @@ public abstract class AbstractEntity {
     }
 
     public void setCreated(LocalDate created) {
-        this.created = created;
+        this.created = created.format(formatter);
     }
 
     public void setLastModified(LocalDate lastModified) {
-        this.lastModified = lastModified;
-    }
-
-    public String lastModifiedToString() {
-        return this.lastModified == null ? "null" : lastModified.toString();
-    }
-    
-    public String createdDateToString() {
-        return this.created == null ? "null" : created.toString();
+        this.lastModified = lastModified.format(formatter);
     }
 }
