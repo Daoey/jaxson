@@ -59,7 +59,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     @Override
     public Response updateWorkItem(Long id, WorkItemModel workItem) {
         if (workItem.getUserNumber() != null) {
-            workItemService.setUser(workItem.getId(), workItem.getUserNumber());
+            workItemService.setUser(workItem.getUserNumber(), workItem.getId());
         }
         if (workItem.getStatus() != null) {
             workItemService.setStatus(workItem.getId(), workItem.getStatus());
