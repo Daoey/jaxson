@@ -19,38 +19,38 @@ import se.teknikhogskolan.springcasemanagement.service.wrapper.Piece;
 public final class WorkItemResourceImpl implements WorkItemResource {
 
     @Autowired
-    WorkItemService workItemService;
-    
-    @Context UriInfo uriInfo;
+    private WorkItemService workItemService;
 
-    /* Content type: json 
-     * Body:
+    @Context
+    private UriInfo uriInfo;
+
+    /*
+     * Content type: json Body:
      * 
-     * {
-     * "description": "some value"
-     * }
+     * { "description": "some value" }
      */
-    
+
     @Override
     public Response createWorkItem(WorkItemModel workItem) {
         WorkItem workItemDao = workItemService.create(workItem.getDescription());
         URI location = uriInfo.getAbsolutePathBuilder().path(workItemDao.getId().toString()).build();
         return Response.created(location).build();
     }
-    
+
     @Override
     public Response getWorkItem(Long id) {
         WorkItem workItem = workItemService.getById(id);
         WorkItemModel workItemModel = new WorkItemModel(workItem);
         return Response.ok(workItemModel).build();
     }
-    
+
     @Override
     public Response getWorkItems(int page, int pageSize) {
+
         Piece<WorkItem> piece = workItemService.getAllByPage(page, pageSize);
         List<WorkItem> workItemDaos = piece.getContent();
         List<WorkItemModel> workItems = new ArrayList<WorkItemModel>();
-        for(WorkItem w : workItemDaos) {
+        for (WorkItem w : workItemDaos) {
             workItems.add(new WorkItemModel(w));
         }
         return Response.ok(workItems).build();
@@ -58,8 +58,13 @@ public final class WorkItemResourceImpl implements WorkItemResource {
 
     @Override
     public Response updateWorkItem(Long id, WorkItemModel workItem) {
-        // TODO Auto-generated method stub
-        return null;
+        if (workItem.getUserNumber() != null) {
+            workItemService.setUser(workItem.getId(), workItem.getUserNumber());
+        }
+        if (workItem.getStatus() != null) {
+            workItemService.setStatus(workItem.getId(), workItem.getStatus());
+        }
+        return Response.ok().build();
     }
 
     @Override
