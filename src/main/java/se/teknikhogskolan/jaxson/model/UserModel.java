@@ -1,20 +1,19 @@
 package se.teknikhogskolan.jaxson.model;
 
 import se.teknikhogskolan.springcasemanagement.model.User;
-import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class UserModel extends AbstractEntity{
+public final class UserModel extends AbstractModel {
 
     private Long userNumber;
     private String username;
     private String firstName;
     private String lastName;
     private boolean active;
-    private TeamModel team;
-    private Collection<WorkItemModel> workItems;
+    private Long teamId;
+    private Collection<Long> workItemsId;
 
     protected UserModel() {
     }
@@ -28,69 +27,44 @@ public final class UserModel extends AbstractEntity{
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.active = user.isActive();
-        //this.team = new TeamModel(user.getTeam());
-        this.workItems = addWorkItems(user);
+        this.teamId = user.getTeam().getId();
+        this.workItemsId = setWorkItemsId(user);
+    }
+
+    private Collection<Long> setWorkItemsId(User user) {
+        Collection<Long> result = new ArrayList<>();
+        if (null != user.getWorkItems()) {
+            user.getWorkItems().forEach(workItem -> result.add(workItem.getId()));
+        }
+        return result;
     }
 
     public Long getUserNumber() {
         return userNumber;
     }
 
-    public UserModel setUserNumber(Long userNumber) {
-        this.userNumber = userNumber;
-        return this;
-    }
-
     public String getUsername() {
         return username;
-    }
-
-    public UserModel setUsername(String username) {
-        this.username = username;
-        return this;
     }
 
     public String getFirstName() {
         return firstName;
     }
 
-    public UserModel setFirstName(String firstName) {
-        this.firstName = firstName;
-        return this;
-    }
-
     public String getLastName() {
         return lastName;
     }
 
-    public UserModel setLastName(String lastName) {
-        this.lastName = lastName;
-        return this;
+    public Long getTeamId() {
+        return teamId;
     }
 
-    public TeamModel getTeam() {
-        return team;
-    }
-
-    public void setTeam(TeamModel team) {
-        this.team = team;
-    }
-
-    public void setWorkItems(Collection<WorkItemModel> workItems) {
-        this.workItems = workItems;
-    }
-
-    public Collection<WorkItemModel> getWorkItems() {
-        return workItems;
+    public Collection<Long> getWorkItemsId() {
+        return workItemsId;
     }
 
     public boolean isActive() {
         return active;
-    }
-
-    public UserModel setActive(boolean active) {
-        this.active = active;
-        return this;
     }
 
     @Override
@@ -127,26 +101,16 @@ public final class UserModel extends AbstractEntity{
         builder.append(", lastName=");
         builder.append(lastName == null ? "null" : lastName);
         builder.append(", teamId=");
-        builder.append(team == null ? "null" : team.getId());
+        builder.append(teamId);
         builder.append(", workItemsSize=");
-        builder.append(workItems == null ? "0" : workItems.size());
+        builder.append(workItemsId == null ? "0" : workItemsId.size());
         builder.append(", active=");
         builder.append(active);
         builder.append(", created=");
-        builder.append(createdDateToString());
+        builder.append(getCreated());
         builder.append(", lastModified=");
-        builder.append(lastModifiedToString());
+        builder.append(getLastModified());
         builder.append("]");
         return builder.toString();
-    }
-
-    private Collection<WorkItemModel> addWorkItems(User user){
-        Collection<WorkItemModel> workItemModels = new ArrayList<>();
-        if(user.getWorkItems() != null) {
-            for (WorkItem workItem : user.getWorkItems()) {
-                workItemModels.add(new WorkItemModel(workItem));
-            }
-        }
-        return workItemModels;
     }
 }

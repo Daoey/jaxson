@@ -29,7 +29,7 @@ public class ModelParser {
                                             user.getUsername(),
                                             user.getFirstName(),
                                             user.getLastName());
-        userModel.setTeamId(null == user.getTeam() ? null : user.getTeam().getId());
+        userModel.setTeamId(null == user.getTeamId() ? null : user.getTeamId().getId());
         userModel.setActive(user.isActive());
         return userModel;
     }*/

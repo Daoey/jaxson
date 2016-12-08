@@ -1,32 +1,28 @@
 package se.teknikhogskolan.jaxson.model;
 
-import java.time.LocalDate;
-
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 
-public final class WorkItemModel extends AbstractEntity {
+public final class WorkItemModel extends AbstractModel {
     
     private String description;
 
     private Status status = Status.UNSTARTED;
 
-    private LocalDate completionDate;
+    private String completionDate;
 
-    private Issue issue;
+    private Long issueId;
 
-    private UserModel user;
-    
-    protected WorkItemModel() {
-    }
+    private Long userId;
+
+    protected WorkItemModel() {}
 
     public WorkItemModel(WorkItem workItem) {
-        
         description = workItem.getDescription();
-        completionDate = workItem.getCompletionDate();
+        completionDate = workItem.getCompletionDate().format(formatter);
         status = workItem.getStatus();
-        //user = new UserModel(workItem.getUser());
-        //issue = new IssueModel(issue.getIssue());
+        userId = (null == workItem.getUser() ? null : workItem.getUser().getId());
+        issueId = (null == workItem.getIssue() ? null : workItem.getIssue().getId());
     }
 
     public WorkItemModel(String description) {
@@ -37,45 +33,20 @@ public final class WorkItemModel extends AbstractEntity {
         return description;
     }
 
-    public WorkItemModel setDescription(String description) {
-        this.description = description;
-        return this;
-    }
-
     public Status getStatus() {
         return status;
     }
 
-    public WorkItemModel setStatus(Status status) {
-        this.status = status;
-        return this;
-    }
-
-    public LocalDate getCompletionDate() {
+    public String getCompletionDate() {
         return completionDate;
     }
 
-    public WorkItemModel setCompletionDate(LocalDate completionDate) {
-        this.completionDate = completionDate;
-        return this;
+    public Long getIssueId() {
+        return issueId;
     }
 
-    public Issue getIssue() {
-        return issue;
-    }
-
-    public WorkItemModel setIssue(Issue issue) {
-        this.issue = issue;
-        return this;
-    }
-
-    public UserModel getUser() {
-        return user;
-    }
-
-    public WorkItemModel setUser(UserModel user) {
-        this.user = user;
-        return this;
+    public Long getUserId() {
+        return userId;
     }
 
     public boolean isDone() {
@@ -118,32 +89,27 @@ public final class WorkItemModel extends AbstractEntity {
         if (result == 0) return 0;
         return 1;
     }
-    
-    public String completionDateToString() {
-        return this.completionDate == null ? "null" : completionDate.toString();
-    }
 
-//    @Override
-//    public String toString() {
-//        StringBuilder builder = new StringBuilder();
-//        builder.append("WorkItem [id=");
-//        builder.append(getId());
-//        builder.append(", description=");
-//        builder.append(description);
-//        builder.append(", status=");
-//        builder.append(status);
-//        builder.append(", issueId=");
-//        builder.append(issue == null ? "null" : issue.getId());
-//        builder.append(", userId=");
-//        builder.append(user == null ? "null" : user.getId());
-//        builder.append(", created=");
-//        builder.append(createdDateToString());
-//        builder.append(", lastModified=");
-//        builder.append(lastModifiedToString());
-//        builder.append(", completionDate=");
-//        builder.append(completionDateToString());
-//        builder.append("]");
-//        return builder.toString();
-//    }
-    
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("WorkItem [id=");
+        builder.append(getId());
+        builder.append(", description=");
+        builder.append(description);
+        builder.append(", status=");
+        builder.append(status);
+        builder.append(", issueId=");
+        builder.append(issueId);
+        builder.append(", userId=");
+        builder.append(userId);
+        builder.append(", created=");
+        builder.append(getCreated());
+        builder.append(", lastModified=");
+        builder.append(getLastModified());
+        builder.append(", completionDate=");
+        builder.append(completionDate);
+        builder.append("]");
+        return builder.toString();
+    }
 }

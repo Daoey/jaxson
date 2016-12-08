@@ -1,18 +1,36 @@
 package se.teknikhogskolan.jaxson.model;
 
-import java.util.List;
+import se.teknikhogskolan.springcasemanagement.model.Team;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 public final class TeamModel {
     private Long id;
     private String name;
-    private List<Long> users;
+    private Collection<Long> usersId;
     private boolean active;
 
-    public TeamModel(Long id, String name, List<Long> users, boolean active) {
+    public TeamModel(Long id, String name, Collection<Long> usersId, boolean active) {
         this.id = id;
         this.name = name;
-        this.users = users;
+        this.usersId = usersId;
         this.active = active;
+    }
+
+    public TeamModel (Team team) {
+        this.id = team.getId();
+        this.name = team.getName();
+        this.active = team.isActive();
+        this.usersId = setUsersId(team);
+    }
+
+    public Collection<Long> setUsersId(Team team) {
+        Collection<Long> result = new ArrayList<>();
+        if (null != team.getUsers()) {
+            team.getUsers().forEach(user -> result.add(user.getId()));
+        }
+        return result;
     }
 
     public Long getId() {
@@ -23,8 +41,8 @@ public final class TeamModel {
         return name;
     }
 
-    public List<Long> getUsers() {
-        return users;
+    public Collection<Long> getUsersId() {
+        return usersId;
     }
 
     public boolean isActive() {
@@ -36,7 +54,7 @@ public final class TeamModel {
         final StringBuffer sb = new StringBuffer("TeamModel{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
-        sb.append(", users=").append(users);
+        sb.append(", usersId=").append(usersId);
         sb.append(", active=").append(active);
         sb.append('}');
         return sb.toString();
@@ -46,18 +64,13 @@ public final class TeamModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         TeamModel teamModel = (TeamModel) o;
-
-        if (!id.equals(teamModel.id)) return false;
         return name.equals(teamModel.name);
-
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = 31 * result + name.hashCode();
+        int result = 31 + name.hashCode();
         return result;
     }
 }
