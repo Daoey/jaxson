@@ -1,5 +1,7 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import java.util.List;
+
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -17,8 +19,6 @@ import javax.ws.rs.core.Response;
 import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserModel;
-
-import java.util.List;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -38,7 +38,8 @@ public interface UserResource {
 
     @GET
     @Path("search")
-    List<UserModel> getUserByParameter(@QueryParam("username") @DefaultValue("") String username, @QueryParam("firstname") @DefaultValue("") String firstname,
+    List<UserModel> getUserByParameter(@QueryParam("username") @DefaultValue("") String username,
+                                       @QueryParam("firstname") @DefaultValue("") String firstname,
                                        @QueryParam("lastname") @DefaultValue("") String lastname);
 
     @DELETE

@@ -1,5 +1,16 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Function;
+import javax.ws.rs.BadRequestException;
+import javax.ws.rs.BeanParam;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ServerErrorException;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.UriInfo;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.model.DateRequestBean;
@@ -12,17 +23,6 @@ import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseExcepti
 import se.teknikhogskolan.springcasemanagement.service.exception.InvalidInputException;
 import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.BeanParam;
-import javax.ws.rs.NotFoundException;
-import javax.ws.rs.ServerErrorException;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.function.Function;
-
 public class UserResourceImpl implements UserResource {
 
     @Context
@@ -34,8 +34,10 @@ public class UserResourceImpl implements UserResource {
     @Override
     public Response createUser(UserModel user) {
         try {
-            UserModel userModel = new UserModel(userService.create(user.getUserNumber(), user.getUsername(), user.getFirstName(), user.getLastName()));
-            return Response.created(uriInfo.getAbsolutePathBuilder().path(userModel.getUserNumber().toString()).build()).build();
+            UserModel userModel = new UserModel(userService.create(user.getUserNumber(),
+                    user.getUsername(), user.getFirstName(), user.getLastName()));
+            return Response.created(uriInfo.getAbsolutePathBuilder()
+                    .path(userModel.getUserNumber().toString()).build()).build();
         } catch (InvalidInputException e) {
             throw new BadRequestException();
         }
@@ -79,12 +81,14 @@ public class UserResourceImpl implements UserResource {
 
     @Override
     public List<UserModel> getAllByPage(@BeanParam PageRequestBean pageRequestBean) {
-        return executeMany(userService1 -> userService1.getAllByPage(pageRequestBean.getPage(), pageRequestBean.getSize()).getContent());
+        return executeMany(userService1 -> userService1.getAllByPage(pageRequestBean.getPage(),
+                pageRequestBean.getSize()).getContent());
     }
 
     @Override
     public List<UserModel> getByCreationDate(@BeanParam DateRequestBean dateRequestBean) {
-        return executeMany(userService1 -> userService1.getByCreationDate(dateRequestBean.getStartDate(), dateRequestBean.getEndDate()));
+        return executeMany(userService1 -> userService1.getByCreationDate(dateRequestBean.getStartDate(),
+                dateRequestBean.getEndDate()));
     }
 
     private List<UserModel> executeMany(Function<UserService, List<User>> operation) {
