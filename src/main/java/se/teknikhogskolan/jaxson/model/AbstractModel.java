@@ -40,10 +40,10 @@ public abstract class AbstractModel {
     }
 
     public void setCreated(LocalDate created) {
-        this.created = created.format(formatter);
+        this.created = (null == created ? null : created.format(formatter));
     }
 
     public void setLastModified(LocalDate lastModified) {
-        this.lastModified = lastModified.format(formatter);
+        this.lastModified = (null == lastModified ? null : lastModified.format(formatter));
     }
 }

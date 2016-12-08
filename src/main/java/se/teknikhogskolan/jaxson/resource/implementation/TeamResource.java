@@ -33,6 +33,13 @@ public class TeamResource {
     @Autowired
     UserService userService;
 
+    @PUT
+    @Path("{id}")
+    public Response addUserToTeam(@PathParam("id") Long teamId, @QueryParam("userId") Long userId) {
+        teamService.addUserToTeam(teamId, userId);
+        return Response.accepted().build();
+    }
+
     @GET
     @Path("{id}/users")
     public Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations) {
