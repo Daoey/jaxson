@@ -1,6 +1,6 @@
 package se.teknikhogskolan.jaxson.resource;
 
-import se.teknikhogskolan.jaxson.model.TeamModel;
+import se.teknikhogskolan.jaxson.model.TeamDto;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -26,5 +26,5 @@ public interface TeamResource {
     Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations);
 
     @PUT
-    Response updateTeam(TeamModel teamModel); // TODO take JSON
+    Response updateTeam(TeamDto teamDto); // TODO take JSON
 }

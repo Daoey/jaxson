@@ -69,7 +69,7 @@ public class TeamResourceImpl implements TeamResource {
     }
 
     @Override
-    public Response updateTeam(TeamModel teamModel) {
+    public Response updateTeam(TeamDto teamDto) {
         return null;
     }
 }

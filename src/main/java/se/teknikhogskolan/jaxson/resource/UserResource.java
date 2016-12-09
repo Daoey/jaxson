@@ -16,9 +16,8 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import se.teknikhogskolan.jaxson.model.DateRequestBean;
-import se.teknikhogskolan.jaxson.model.PageRequestBean;
-import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.jaxson.model.*;
+import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -34,26 +33,18 @@ public interface UserResource {
 
     @PUT
     @Path("{userNumber}")
-    UserDto updateUser(@PathParam("userNumber") Long userNumber, UserDto user);
+    UserDto updateUser(@PathParam("userNumber") Long userNumber,
+                       @QueryParam("active") boolean active, UserDto user);
 
     @GET
-    @Path("search")
-    List<UserDto> getUserByParameter(@QueryParam("username") @DefaultValue("") String username,
-                                     @QueryParam("firstname") @DefaultValue("") String firstname,
-                                     @QueryParam("lastname") @DefaultValue("") String lastname);
-
-    @DELETE
-    @Path("{userNumber}")
-    UserDto deleteUser(@PathParam("userNumber") Long userNumber);
+    @Path("{userId}/workitems")
+    List<WorkItemDto> getAllWorkItemsFromUser(@PathParam("userId") Long id);
 
     @GET
-    List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean);
+    List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean,
+                               @BeanParam UserRequestBean userRequestBean);
 
     @GET
     @Path("creation")
     List<UserDto> getByCreationDate(@BeanParam DateRequestBean dateRequestBean);
-
-    /* TODO
-    *  Activate
-    * */
 }

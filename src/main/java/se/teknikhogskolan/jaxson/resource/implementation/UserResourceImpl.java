@@ -13,9 +13,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import se.teknikhogskolan.jaxson.model.DateRequestBean;
-import se.teknikhogskolan.jaxson.model.PageRequestBean;
-import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.jaxson.model.*;
 import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
@@ -49,7 +47,7 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public UserDto updateUser(Long userNumber, UserDto userDto) {
+    public UserDto updateUser(Long userNumber, boolean active, UserDto userDto) {
         UserDto createdUser = null;
         if (userDto.getUsername() != null) {
             createdUser = execute(userService1 -> userService1.updateUsername(userNumber, userDto.getUsername()));
@@ -69,20 +67,13 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public List<UserDto> getUserByParameter(String username, String firstname, String lastname) {
-        return executeMany(userService1 -> userService1.search(firstname, lastname, username));
-    }
-
-    @Override
-    public UserDto deleteUser(Long userNumber) {
-        //TODO inactive user?
+    public List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean, @BeanParam UserRequestBean userRequestBean) {
         return null;
     }
 
     @Override
-    public List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean) {
-        return executeMany(userService1 -> userService1.getAllByPage(pageRequestBean.getPage(),
-                pageRequestBean.getSize()).getContent());
+    public List<WorkItemDto> getAllWorkItemsFromUser(Long id) {
+        return null;
     }
 
     @Override
