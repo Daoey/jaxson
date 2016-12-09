@@ -31,8 +31,6 @@ public interface WorkItemResource {
             @QueryParam("createdBefore") String createdBefore, @QueryParam("teamId") Long teamId,
             @QueryParam("hasIssue") Boolean hasIssue, @QueryParam("completedAfter") String completedAfter,
             @QueryParam("completedBefore") String completedBefore);
-
-    @RESTORE
     
     @GET
     @Path("{id}")
