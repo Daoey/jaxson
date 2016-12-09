@@ -12,7 +12,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import se.teknikhogskolan.jaxson.model.WorkItemModel;
+import se.teknikhogskolan.jaxson.model.WorkItemDto;
 
 @Path("workitems")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,7 +20,7 @@ import se.teknikhogskolan.jaxson.model.WorkItemModel;
 public interface WorkItemResource {
 
     @POST
-    Response createWorkItem(WorkItemModel workItem);
+    Response createWorkItem(WorkItemDto workItem);
 
     @GET
     Response getWorkItems(@QueryParam("page") int page, @QueryParam("size") int size);
@@ -31,7 +31,7 @@ public interface WorkItemResource {
 
     @PUT
     @Path("{id}")
-    Response updateWorkItem(@PathParam("id") Long id, WorkItemModel workItem);
+    Response updateWorkItem(@PathParam("id") Long id, WorkItemDto workItem);
 
     @DELETE
     @Path("{id}")

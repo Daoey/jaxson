@@ -11,7 +11,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
-import se.teknikhogskolan.jaxson.model.WorkItemModel;
+import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.resource.WorkItemResource;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
@@ -30,7 +30,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
      */
 
     @Override
-    public Response createWorkItem(WorkItemModel workItem) {
+    public Response createWorkItem(WorkItemDto workItem) {
         WorkItem workItemDao = workItemService.create(workItem.getDescription());
         URI location = uriInfo.getAbsolutePathBuilder().path(workItemDao.getId().toString()).build();
         return Response.created(location).build();
@@ -39,8 +39,8 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     @Override
     public Response getWorkItem(Long id) {
         WorkItem workItem = workItemService.getById(id);
-        WorkItemModel workItemModel = new WorkItemModel(workItem);
-        return Response.ok(workItemModel).build();
+        WorkItemDto workItemDto = new WorkItemDto(workItem);
+        return Response.ok(workItemDto).build();
     }
 
     @Override
@@ -48,9 +48,9 @@ public final class WorkItemResourceImpl implements WorkItemResource {
 
         Piece<WorkItem> piece = workItemService.getAllByPage(page, pageSize);
         List<WorkItem> workItemDaos = piece.getContent();
-        List<WorkItemModel> workItems = new ArrayList<WorkItemModel>();
+        List<WorkItemDto> workItems = new ArrayList<WorkItemDto>();
         for (WorkItem w : workItemDaos) {
-            workItems.add(new WorkItemModel(w));
+            workItems.add(new WorkItemDto(w));
         }
         return Response.ok(workItems).build();
     }
@@ -62,7 +62,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
      * 
      */
     @Override
-    public Response updateWorkItem(Long id, WorkItemModel workItem) {
+    public Response updateWorkItem(Long id, WorkItemDto workItem) {
         if (workItem.getUserNumber() != null) {
             workItemService.setUser(workItem.getUserNumber(), id);
         }

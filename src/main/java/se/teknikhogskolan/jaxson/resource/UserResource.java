@@ -18,7 +18,7 @@ import javax.ws.rs.core.Response;
 
 import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
-import se.teknikhogskolan.jaxson.model.UserModel;
+import se.teknikhogskolan.jaxson.model.UserDto;
 
 @Path("users")
 @Produces(MediaType.APPLICATION_JSON)
@@ -26,32 +26,32 @@ import se.teknikhogskolan.jaxson.model.UserModel;
 public interface UserResource {
 
     @POST
-    Response createUser(UserModel user);
+    Response createUser(UserDto user);
 
     @GET
     @Path("{userNumber}")
-    UserModel getUserByUserNumber(@PathParam("userNumber") Long userNumber);
+    UserDto getUserByUserNumber(@PathParam("userNumber") Long userNumber);
 
     @PUT
     @Path("{userNumber}")
-    UserModel updateUser(@PathParam("userNumber") Long userNumber, UserModel user);
+    UserDto updateUser(@PathParam("userNumber") Long userNumber, UserDto user);
 
     @GET
     @Path("search")
-    List<UserModel> getUserByParameter(@QueryParam("username") @DefaultValue("") String username,
-                                       @QueryParam("firstname") @DefaultValue("") String firstname,
-                                       @QueryParam("lastname") @DefaultValue("") String lastname);
+    List<UserDto> getUserByParameter(@QueryParam("username") @DefaultValue("") String username,
+                                     @QueryParam("firstname") @DefaultValue("") String firstname,
+                                     @QueryParam("lastname") @DefaultValue("") String lastname);
 
     @DELETE
     @Path("{userNumber}")
-    UserModel deleteUser(@PathParam("userNumber") Long userNumber);
+    UserDto deleteUser(@PathParam("userNumber") Long userNumber);
 
     @GET
-    List<UserModel> getAllByPage(@BeanParam PageRequestBean pageRequestBean);
+    List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean);
 
     @GET
     @Path("creation")
-    List<UserModel> getByCreationDate(@BeanParam DateRequestBean dateRequestBean);
+    List<UserDto> getByCreationDate(@BeanParam DateRequestBean dateRequestBean);
 
     /* TODO
     *  Activate

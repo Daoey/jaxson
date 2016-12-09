@@ -5,20 +5,20 @@ import se.teknikhogskolan.springcasemanagement.model.Team;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class TeamModel {
+public final class TeamDto {
     private Long id;
     private String name;
     private Collection<Long> usersId;
     private boolean active;
 
-    public TeamModel(Long id, String name, Collection<Long> usersId, boolean active) {
+    public TeamDto(Long id, String name, Collection<Long> usersId, boolean active) {
         this.id = id;
         this.name = name;
         this.usersId = usersId;
         this.active = active;
     }
 
-    public TeamModel (Team team) {
+    public TeamDto(Team team) {
         this.id = team.getId();
         this.name = team.getName();
         this.active = team.isActive();
@@ -51,7 +51,7 @@ public final class TeamModel {
 
     @Override
     public String toString() {
-        final StringBuffer sb = new StringBuffer("TeamModel{");
+        final StringBuffer sb = new StringBuffer("TeamDto{");
         sb.append("id=").append(id);
         sb.append(", name='").append(name).append('\'');
         sb.append(", usersId=").append(usersId);
@@ -64,8 +64,8 @@ public final class TeamModel {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        TeamModel teamModel = (TeamModel) o;
-        return name.equals(teamModel.name);
+        TeamDto teamDto = (TeamDto) o;
+        return name.equals(teamDto.name);
     }
 
     @Override

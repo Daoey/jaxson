@@ -1,8 +1,8 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import se.teknikhogskolan.jaxson.model.TeamModel;
-import se.teknikhogskolan.jaxson.model.UserModel;
+import se.teknikhogskolan.jaxson.model.TeamDto;
+import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.resource.TeamResource;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
@@ -37,19 +37,19 @@ public class TeamResourceImpl implements TeamResource {
 
     @Override
     public Response createTeam(String name) {
-        TeamModel teamModel = teamModelFrom(teamService.create(name));
-        return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + teamModel.getId()).build();
+        TeamDto teamDto = teamModelFrom(teamService.create(name));
+        return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + teamDto.getId()).build();
     }
 
     @Override
     public Response getTeam(Long id) {
         if (weHaveA(id)) {
             Team team = teamService.getById(id);
-            TeamModel teamModel = teamModelFrom(team);
-            return Response.ok(teamModel).build();
+            TeamDto teamDto = teamModelFrom(team);
+            return Response.ok(teamDto).build();
         }
-        Collection<TeamModel> teamModels = teamModelsFromTeams(teamService.getAll());
-        return Response.ok(teamModels).build();
+        Collection<TeamDto> teamDtos = teamModelsFromTeams(teamService.getAll());
+        return Response.ok(teamDtos).build();
     }
 
     private boolean weHaveA(Object o) {
@@ -58,13 +58,13 @@ public class TeamResourceImpl implements TeamResource {
 
     @Override
     public Response getUsersInTeam(Long id, boolean asLocations) {
-        List<UserModel> userModels = new ArrayList<>();
-        userService.getAllByTeamId(id).forEach(user -> userModels.add(new UserModel(user)));
+        List<UserDto> userDtos = new ArrayList<>();
+        userService.getAllByTeamId(id).forEach(user -> userDtos.add(new UserDto(user)));
         if (asLocations) {
             List<String> uris = new ArrayList<>();
-            userModels.forEach(u -> uris.add(String.format("../users/%d", u.getId())));
+            userDtos.forEach(u -> uris.add(String.format("../users/%d", u.getId())));
             return Response.ok(uris).build();
         }
-        return Response.ok(userModels).build();
+        return Response.ok(userDtos).build();
     }
 }

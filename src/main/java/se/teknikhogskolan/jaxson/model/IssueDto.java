@@ -1,4 +1,4 @@
 package se.teknikhogskolan.jaxson.model;
 
-public final class Issue {
+public final class IssueDto {
 }

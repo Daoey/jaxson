@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
-import se.teknikhogskolan.jaxson.model.UserModel;
+import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
@@ -32,33 +32,33 @@ public class UserResourceImpl implements UserResource {
     UserService userService;
 
     @Override
-    public Response createUser(UserModel user) {
+    public Response createUser(UserDto user) {
         try {
-            UserModel userModel = new UserModel(userService.create(user.getUserNumber(),
+            UserDto userDto = new UserDto(userService.create(user.getUserNumber(),
                     user.getUsername(), user.getFirstName(), user.getLastName()));
             return Response.created(uriInfo.getAbsolutePathBuilder()
-                    .path(userModel.getUserNumber().toString()).build()).build();
+                    .path(userDto.getUserNumber().toString()).build()).build();
         } catch (InvalidInputException e) {
             throw new BadRequestException();
         }
     }
 
     @Override
-    public UserModel getUserByUserNumber(Long userNumber) {
+    public UserDto getUserByUserNumber(Long userNumber) {
         return execute(userService1 -> userService1.getByUserNumber(userNumber));
     }
 
     @Override
-    public UserModel updateUser(Long userNumber, UserModel userModel) {
-        UserModel createdUser = null;
-        if (userModel.getUsername() != null) {
-            createdUser = execute(userService1 -> userService1.updateUsername(userNumber, userModel.getUsername()));
+    public UserDto updateUser(Long userNumber, UserDto userDto) {
+        UserDto createdUser = null;
+        if (userDto.getUsername() != null) {
+            createdUser = execute(userService1 -> userService1.updateUsername(userNumber, userDto.getUsername()));
         }
-        if (userModel.getFirstName() != null) {
-            createdUser = execute(userService1 -> userService1.updateFirstName(userNumber, userModel.getFirstName()));
+        if (userDto.getFirstName() != null) {
+            createdUser = execute(userService1 -> userService1.updateFirstName(userNumber, userDto.getFirstName()));
         }
-        if (userModel.getLastName() != null) {
-            createdUser = execute(userService1 -> userService1.updateLastName(userNumber, userModel.getLastName()));
+        if (userDto.getLastName() != null) {
+            createdUser = execute(userService1 -> userService1.updateLastName(userNumber, userDto.getLastName()));
         }
 
         if (createdUser != null) {
@@ -69,33 +69,33 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public List<UserModel> getUserByParameter(String username, String firstname, String lastname) {
+    public List<UserDto> getUserByParameter(String username, String firstname, String lastname) {
         return executeMany(userService1 -> userService1.search(firstname, lastname, username));
     }
 
     @Override
-    public UserModel deleteUser(Long userNumber) {
+    public UserDto deleteUser(Long userNumber) {
         //TODO inactive user?
         return null;
     }
 
     @Override
-    public List<UserModel> getAllByPage(@BeanParam PageRequestBean pageRequestBean) {
+    public List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean) {
         return executeMany(userService1 -> userService1.getAllByPage(pageRequestBean.getPage(),
                 pageRequestBean.getSize()).getContent());
     }
 
     @Override
-    public List<UserModel> getByCreationDate(@BeanParam DateRequestBean dateRequestBean) {
+    public List<UserDto> getByCreationDate(@BeanParam DateRequestBean dateRequestBean) {
         return executeMany(userService1 -> userService1.getByCreationDate(dateRequestBean.getStartDate(),
                 dateRequestBean.getEndDate()));
     }
 
-    private List<UserModel> executeMany(Function<UserService, List<User>> operation) {
-        List<UserModel> userModels = new ArrayList<>();
+    private List<UserDto> executeMany(Function<UserService, List<User>> operation) {
+        List<UserDto> userDtos = new ArrayList<>();
         try {
-            operation.apply(userService).forEach(user -> userModels.add(new UserModel(user)));
-            return userModels;
+            operation.apply(userService).forEach(user -> userDtos.add(new UserDto(user)));
+            return userDtos;
         } catch (NoSearchResultException e) {
             throw new NotFoundException();
         } catch (DatabaseException e) {
@@ -103,9 +103,9 @@ public class UserResourceImpl implements UserResource {
         }
     }
 
-    private UserModel execute(Function<UserService, User> operation) {
+    private UserDto execute(Function<UserService, User> operation) {
         try {
-            return new UserModel(operation.apply(userService));
+            return new UserDto(operation.apply(userService));
         } catch (NoSearchResultException e) {
             throw new NotFoundException();
         } catch (DatabaseException e) {

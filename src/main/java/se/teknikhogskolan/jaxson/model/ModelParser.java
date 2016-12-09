@@ -8,17 +8,17 @@ import java.util.List;
 
 public class ModelParser {
 
-    public static TeamModel teamModelFrom(Team team) {
+    public static TeamDto teamModelFrom(Team team) {
         List<Long> users = new ArrayList<>();
         team.getUsers().forEach(u -> {
             users.add(u.getId());
         });
-        return new TeamModel(team.getId(), team.getName(), users, team.isActive());
+        return new TeamDto(team.getId(), team.getName(), users, team.isActive());
     }
 
-    public static Collection<TeamModel> teamModelsFromTeams(Iterable<Team> teams) {
-        Collection<TeamModel> teamModels = new ArrayList<>();
-        teams.forEach(u -> teamModels.add(teamModelFrom(u)));
-        return teamModels;
+    public static Collection<TeamDto> teamModelsFromTeams(Iterable<Team> teams) {
+        Collection<TeamDto> teamDtos = new ArrayList<>();
+        teams.forEach(u -> teamDtos.add(teamModelFrom(u)));
+        return teamDtos;
     }
 }

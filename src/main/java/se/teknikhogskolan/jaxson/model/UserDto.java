@@ -5,7 +5,7 @@ import se.teknikhogskolan.springcasemanagement.model.User;
 import java.util.ArrayList;
 import java.util.Collection;
 
-public final class UserModel extends AbstractModel {
+public final class UserDto extends AbstractModel {
 
     private Long userNumber;
     private String username;
@@ -15,10 +15,10 @@ public final class UserModel extends AbstractModel {
     private Long teamId;
     private Collection<Long> workItemsId;
 
-    protected UserModel() {
+    protected UserDto() {
     }
 
-    public UserModel(User user) {
+    public UserDto(User user) {
         setId(user.getId());
         setCreated(user.getCreated());
         setLastModified(user.getLastModified());
@@ -72,8 +72,8 @@ public final class UserModel extends AbstractModel {
         if (this == obj) {
             return true;
         }
-        if (obj instanceof UserModel) {
-            UserModel otherUser = (UserModel) obj;
+        if (obj instanceof UserDto) {
+            UserDto otherUser = (UserDto) obj;
             return userNumber.equals(otherUser.getUserNumber()) && username.equals(otherUser.getUsername());
         }
         return false;
@@ -90,7 +90,7 @@ public final class UserModel extends AbstractModel {
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
-        builder.append("UserModel [id=");
+        builder.append("UserDto [id=");
         builder.append(getId());
         builder.append(", userNumber=");
         builder.append(userNumber);

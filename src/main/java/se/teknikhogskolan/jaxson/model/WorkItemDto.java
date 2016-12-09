@@ -3,7 +3,7 @@ package se.teknikhogskolan.jaxson.model;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 
-public final class WorkItemModel extends AbstractModel {
+public final class WorkItemDto extends AbstractModel {
 
     private String description;
 
@@ -17,10 +17,10 @@ public final class WorkItemModel extends AbstractModel {
 
     private Long userNumber;
 
-    protected WorkItemModel() {
+    protected WorkItemDto() {
     }
 
-    public WorkItemModel(WorkItem workItem) {
+    public WorkItemDto(WorkItem workItem) {
         
         setId(workItem.getId());
         setCreated(workItem.getCreated());
@@ -39,7 +39,7 @@ public final class WorkItemModel extends AbstractModel {
         }
     }
 
-    public WorkItemModel(String description) {
+    public WorkItemDto(String description) {
         this.description = description;
     }
 
