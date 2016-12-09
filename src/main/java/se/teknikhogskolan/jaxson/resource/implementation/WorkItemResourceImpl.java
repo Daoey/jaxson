@@ -155,9 +155,9 @@ public final class WorkItemResourceImpl implements WorkItemResource {
 
 
     private Response convertCollectionToResponse(Collection<WorkItem> workItemDaos) {
-        List<WorkItemModel> workItems = new ArrayList<WorkItemModel>();
+        List<WorkItemDto> workItems = new ArrayList<WorkItemDto>();
         for (WorkItem w : workItemDaos) {
-            workItems.add(new WorkItemModel(w));
+            workItems.add(new WorkItemDto(w));
         }
         return Response.ok(workItems).build();
     }
