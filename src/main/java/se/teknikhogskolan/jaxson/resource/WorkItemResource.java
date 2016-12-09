@@ -2,6 +2,7 @@ package se.teknikhogskolan.jaxson.resource;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
+import javax.ws.rs.DefaultValue;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -22,9 +23,15 @@ public interface WorkItemResource {
     @POST
     Response createWorkItem(WorkItemDto workItem);
 
+    // TODO change to beanparam
     @GET
-    Response getWorkItems(@QueryParam("page") int page, @QueryParam("size") int size);
-
+    Response getWorkItems(@QueryParam("page") int page, @QueryParam("size") @DefaultValue("10") int size,
+            @QueryParam("description") String description, @QueryParam("userNumber") Long userNumber,
+            @QueryParam("status") String status, @QueryParam("createdAfter") String createdAfter,
+            @QueryParam("createdBefore") String createdBefore, @QueryParam("teamId") Long teamId,
+            @QueryParam("hasIssue") Boolean hasIssue, @QueryParam("completedAfter") String completedAfter,
+            @QueryParam("completedBefore") String completedBefore);
+    
     @GET
     @Path("{id}")
     Response getWorkItem(@PathParam("id") Long id);
@@ -37,5 +44,9 @@ public interface WorkItemResource {
     @Path("{id}")
     Response deleteWorkItem(@PathParam("id") Long id,
             @QueryParam("deleteOnlyAssignedIssue") Boolean deleteOnlyAssignedIssue);
+
+    @DELETE
+    @Path("{id}/issues")
+    Response deleteAssignedIssue(@PathParam("id") Long id);
 
 }

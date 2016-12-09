@@ -26,14 +26,17 @@ public final class WorkItemDto extends AbstractModel {
         setCreated(workItem.getCreated());
         setLastModified(workItem.getLastModified());
         description = workItem.getDescription();
-        completionDate = workItem.getCompletionDate().format(formatter);
         status = workItem.getStatus();
-        
+
+        if (workItem.getCompletionDate() != null) {
+            completionDate = workItem.getCompletionDate().format(formatter);
+        }
+
         if (workItem.getUser() != null) {
             userId = workItem.getUser().getId();
             userNumber = workItem.getUser().getUserNumber();
         }
-        
+
         if (workItem.getIssue() != null) {
             issueId = workItem.getIssue().getId();
         }

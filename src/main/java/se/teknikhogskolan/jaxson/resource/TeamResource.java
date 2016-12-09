@@ -1,5 +1,7 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import se.teknikhogskolan.jaxson.model.TeamModel;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -14,7 +16,7 @@ public interface TeamResource {
     Response addUserToTeam(@PathParam("id") Long teamId, @QueryParam("userId") Long userId);
 
     @POST
-    Response createTeam(@QueryParam("name") String name);
+    Response createTeam(@QueryParam("name") String name); // TODO take JSON not QueryParam
 
     @GET
     Response getTeam(@QueryParam("id") Long id);
@@ -22,4 +24,7 @@ public interface TeamResource {
     @GET
     @Path("{id}/users")
     Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations);
+
+    @PUT
+    Response updateTeam(TeamModel teamModel); // TODO take JSON
 }

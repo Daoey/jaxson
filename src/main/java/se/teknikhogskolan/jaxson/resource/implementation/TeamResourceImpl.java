@@ -67,4 +67,9 @@ public class TeamResourceImpl implements TeamResource {
         }
         return Response.ok(userDtos).build();
     }
+
+    @Override
+    public Response updateTeam(TeamModel teamModel) {
+        return null;
+    }
 }
