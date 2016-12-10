@@ -1,6 +1,6 @@
 package se.teknikhogskolan.jaxson.exception;
 
-public class ConflictException extends RuntimeException {
+public final class ConflictException extends RuntimeException {
 
     private static final long serialVersionUID = 7968389335316189609L;
 
