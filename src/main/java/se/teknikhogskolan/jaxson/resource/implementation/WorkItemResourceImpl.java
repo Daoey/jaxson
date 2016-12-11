@@ -1,6 +1,7 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -12,10 +13,18 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import se.teknikhogskolan.jaxson.exception.ConflictException;
+import se.teknikhogskolan.jaxson.exception.IncompleteException;
+import se.teknikhogskolan.jaxson.model.IssueDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
+import se.teknikhogskolan.jaxson.model.WorkItemsRequestBean;
+import se.teknikhogskolan.jaxson.model.WorkItemsRequestBean.RequestType;
 import se.teknikhogskolan.jaxson.resource.WorkItemResource;
+import se.teknikhogskolan.springcasemanagement.model.Issue;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
+import se.teknikhogskolan.springcasemanagement.service.IssueService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
+import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
 import se.teknikhogskolan.springcasemanagement.service.wrapper.Piece;
 
 public final class WorkItemResourceImpl implements WorkItemResource {
@@ -23,13 +32,16 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     @Autowired
     private WorkItemService workItemService;
 
+    @Autowired
+    private IssueService issueService;
+
     @Context
     private UriInfo uriInfo;
 
     /*
-     * JSON body for creating a workItem { "description": "some value" }
+     * http://127.0.0.1:8080/jaxson/workitems JSON body for creating a workItem
+     * {"description": "some workItem description"}
      */
-
     @Override
     public Response createWorkItem(WorkItemDto workItem) {
         WorkItem workItemDao = workItemService.create(workItem.getDescription());
@@ -37,6 +49,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         return Response.created(location).build();
     }
 
+    // http://127.0.0.1:8080/jaxson/workitems/1
     @Override
     public Response getWorkItem(Long id) {
         WorkItem workItem = workItemService.getById(id);
@@ -45,114 +58,88 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     }
 
     /*
-     * JSON body for changing a workItem status to DONE (to allow issue
-     * assignment), assigning userNumber 1 and adding a issue to it. (Assigning
-     * the issue to it will change status to STARTED)
-     *
-     * {"status": "DONE", "userNumber": 1, "issueId": 1}
-     * 
+     * http://127.0.0.1:8080/jaxson/workitems/1 JSON body for changing a
+     * workItem status to DONE (to allow issue assignment) {"status": "DONE"}
      */
     @Override
     public Response updateWorkItem(Long id, WorkItemDto workItem) {
-        if (workItem.getUserNumber() != null) {
-            workItemService.setUser(workItem.getUserNumber(), id);
-        }
         if (workItem.getStatus() != null) {
             workItemService.setStatus(id, workItem.getStatus());
-        }
-        if (workItem.getIssueId() != null) {
-            workItemService.addIssueToWorkItem(workItem.getIssueId(), id);
         }
         return Response.ok().build();
     }
 
+    // http://127.0.0.1:8080/jaxson/workitems/1
     @Override
-    public Response deleteWorkItem(Long id, Boolean deleteOnlyAssignedIssue) {
-
-        if (deleteOnlyAssignedIssue != null && deleteOnlyAssignedIssue.equals(Boolean.TRUE)) {
-            workItemService.removeIssueFromWorkItem(id);
-        } else {
-            //Removes assigned issues too
-            workItemService.removeById(id);
-        }
-
+    public Response deleteWorkItem(Long id) {
+        workItemService.removeById(id);
         return Response.status(Status.NO_CONTENT).build();
     }
 
     @Override
-    public Response deleteAssignedIssue(Long id) {
-        // TODO Remove this method or remove ability to delete only assigned
-        // issue in deleteWorkItem
-        workItemService.removeIssueFromWorkItem(id);
-        return Response.status(Status.NO_CONTENT).build();
-    }
+    public Response getWorkItems(WorkItemsRequestBean workItemsRequestBean) {
 
-    @Override
-    public Response getWorkItems(int page, int size, String description, Long userNumber, String status,
-            String createdAfter, String createdBefore, Long teamId, Boolean hasIssue, String completedAfter,
-            String completedBefore) {
+        RequestType requestType = workItemsRequestBean.calculateRequestType();
 
-        if (description != null) {
-            return getWorkItemsByDescription();
-        } else if (userNumber != null) {
-            return getWorkItemsByUserNumber();
-        } else if (status != null) {
-            return getWorkItemsByStatus();
-        } else if (createdAfter != null && createdBefore != null) {
-            return getWorkItemsByCreationDate();
-        } else if (teamId != null) {
-            return getWorkItemsByTeamId();
-        } else if (hasIssue != null && hasIssue.equals(Boolean.TRUE)) {
-            return getWorkItemsWithIssues();
-        } else if (completedAfter != null && completedBefore != null) {
-            return getWorkItemsByCompletionDate();
-        } else {
-            return getWorkItemsByPage(page, size);
+        if (requestType == RequestType.CONFLICTING) {
+            throw new ConflictException("Could not get work items. Conflicting query parameters");
         }
 
+        if (requestType == RequestType.INCOMPLETE) {
+            throw new IncompleteException("Could not get work items. Incomplete query parameters");
+        }
+
+        if (requestType == RequestType.COMPLETED) {
+            return getWorkItemsByCompletionDate(workItemsRequestBean.getCompletedAfter(),
+                    workItemsRequestBean.getCompletedBefore());
+
+        } else if (requestType == RequestType.DESCRIPTION) {
+            return getWorkItemsByDescription(workItemsRequestBean.getDescription());
+
+        } else if (requestType == RequestType.STATUS) {
+            return getWorkItemsByStatus(workItemsRequestBean.getStatus());
+
+        } else if (requestType == RequestType.CREATED) {
+            return getWorkItemsByCreationDate(workItemsRequestBean.getCreatedAfter(),
+                    workItemsRequestBean.getCreatedBefore());
+
+        } else {
+            return getWorkItemsByPage(workItemsRequestBean.getPage(), workItemsRequestBean.getSize());
+        }
     }
 
+    // http://127.0.0.1:8080/jaxson/workitems
+    // http://127.0.0.1:8080/jaxson/workitems?page=1&size=1
     private Response getWorkItemsByPage(int page, int size) {
         Piece<WorkItem> piece = workItemService.getAllByPage(page, size);
         List<WorkItem> workItemDaos = piece.getContent();
         return convertCollectionToResponse(workItemDaos);
     }
 
-    private Response getWorkItemsByCreationDate() {
-        // TODO Auto-generated method stub
-        return null;
+    // http://127.0.0.1:8080/jaxson/workitems?createdAfter=2016-12-07&createdBefore=2017-01-12
+    private Response getWorkItemsByCreationDate(LocalDate startDate, LocalDate endDate) {
+        Collection<WorkItem> workItems = workItemService.getByCreatedBetweenDates(startDate, endDate);
+        return convertCollectionToResponse(workItems);
     }
 
-    private Response getWorkItemsWithIssues() {
-        Collection<WorkItem> workItemDaos = workItemService.getAllWithIssue();
-        return convertCollectionToResponse(workItemDaos);
+    // http://127.0.0.1:8080/jaxson/workitems?completedAfter=2016-12-10&completedBefore=2017-02-10
+    private Response getWorkItemsByCompletionDate(LocalDate startDate, LocalDate endDate) {
+        Collection<WorkItem> workItems = workItemService.getCompletedWorkItems(startDate, endDate);
+        return convertCollectionToResponse(workItems);
     }
 
-    private Response getWorkItemsByTeamId() {
-        // TODO Auto-generated method stub
-        return null;
+    // http://127.0.0.1:8080/jaxson/workitems?status=UNSTARTED
+    private Response getWorkItemsByStatus(String string) {
+        Collection<WorkItem> workItems = workItemService
+                .getByStatus(se.teknikhogskolan.springcasemanagement.model.WorkItem.Status.valueOf(string));
+        return convertCollectionToResponse(workItems);
     }
 
-    private Response getWorkItemsByCompletionDate() {
-        // TODO Auto-generated method stub
-        return null;
+    // http://127.0.0.1:8080/jaxson/workitems?description=workItem
+    private Response getWorkItemsByDescription(String description) {
+        Collection<WorkItem> workItems = workItemService.getByDescriptionContains(description);
+        return convertCollectionToResponse(workItems);
     }
-
-    private Response getWorkItemsByStatus() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private Response getWorkItemsByUserNumber() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
-    private Response getWorkItemsByDescription() {
-        // TODO Auto-generated method stub
-        return null;
-    }
-
 
     private Response convertCollectionToResponse(Collection<WorkItem> workItemDaos) {
         List<WorkItemDto> workItems = new ArrayList<WorkItemDto>();
@@ -160,5 +147,62 @@ public final class WorkItemResourceImpl implements WorkItemResource {
             workItems.add(new WorkItemDto(w));
         }
         return Response.ok(workItems).build();
+    }
+
+    // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
+    // {"description": "some issue description"}
+    @Override
+    public Response createAndAssignIssue(Long id, IssueDto issue) {
+        Issue issueDao = workItemService.createIssue(issue.getDescription());
+        workItemService.addIssueToWorkItem(issueDao.getId(), id);
+        URI location = uriInfo.getAbsolutePath();
+        return Response.created(location).build();
+    }
+
+    // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
+    @Override
+    public Response getAssignedIssue(Long id) {
+
+        WorkItem workItem = workItemService.getById(id);
+
+        if (workItem.getIssue() == null) {
+            throw new NoSearchResultException("No issue assigned to workItem with id " + id);
+        }
+        
+        IssueDto issueDto = new IssueDto(workItem.getIssue());
+        
+        return Response.ok(issueDto).build();
+    }
+
+    // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
+    // {"id": 1,"description": "some new issue description"}
+    @Override
+    public Response updateAssignedIssue(Long id, IssueDto issue) {
+        issueService.updateDescription(issue.getId(), issue.getDescription());
+        return Response.ok().build();
+    }
+
+    // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
+    @Override
+    public Response deleteAssignedIssue(Long id) {
+        workItemService.removeIssueFromWorkItem(id);
+        return Response.status(Status.NO_CONTENT).build();
+    }
+
+    // http://127.0.0.1:8080/jaxson/workitems/issue
+    //TODO Consider if there is a better URI option for this method
+    @Override
+    public Response getAllWorkItemsWithIssue() {
+        Collection<WorkItem> workItems = workItemService.getAllWithIssue();
+        return convertCollectionToResponse(workItems);
+    }
+
+    //http://127.0.0.1:8080/jaxson/workitems/{id}/users
+    //{"userNumber": 1}
+    //TODO Consider if there is a better URI option for this method
+    @Override
+    public Response assignUserToWorkItem(Long id, WorkItemDto workItem) {
+        workItemService.setUser(workItem.getUserNumber(), id);
+        return Response.status(Status.NO_CONTENT).build();
     }
 }
