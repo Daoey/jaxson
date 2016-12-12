@@ -1,18 +1,15 @@
 package se.teknikhogskolan.jaxson.exception;
 
-public final class ConflictException extends RuntimeException {
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 
-    private static final long serialVersionUID = 7968389335316189609L;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-    public ConflictException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public final class ConflictException extends WebApplicationException {
+
+    private static final long serialVersionUID = 1L;
 
     public ConflictException(String message) {
-        super(message);
-    }
-
-    public ConflictException() {
-        super();
+        super(Response.status(CONFLICT).entity(message).build());
     }
 }
