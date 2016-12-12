@@ -43,7 +43,6 @@ public class TeamResourceImpl implements TeamResource {
     @Override
     public Response createTeam(TeamDto teamDto) {
         Team team = teamService.create(teamDto.getName());
-        System.out.println("created " + team.getId() + ", " + team.getName());
         updateTeam(teamDto);
         return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + team.getId()).build();
     }

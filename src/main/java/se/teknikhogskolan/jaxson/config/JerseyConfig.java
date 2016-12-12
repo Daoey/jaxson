@@ -5,6 +5,7 @@ import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
+import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NoSearchResultExceptionMapper;
 import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
@@ -20,5 +21,6 @@ public final class JerseyConfig extends ResourceConfig {
         register(UserResourceImpl.class);
         register(WorkItemResourceImpl.class);
         register(NoSearchResultExceptionMapper.class);
+        register(DatabaseExceptionMapper.class);
     }
 }
