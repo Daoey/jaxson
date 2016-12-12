@@ -2,7 +2,6 @@ package se.teknikhogskolan.jaxson.model;
 
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-import java.time.LocalDate;
 
 public class UserRequestBean {
 
@@ -17,4 +16,16 @@ public class UserRequestBean {
     @QueryParam("lastname")
     @DefaultValue("")
     private String lastname;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getFirtname() {
+        return firtname;
+    }
+
+    public String getLastname() {
+        return lastname;
+    }
 }
