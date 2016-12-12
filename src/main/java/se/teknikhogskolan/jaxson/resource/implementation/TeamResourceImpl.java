@@ -52,8 +52,8 @@ public class TeamResourceImpl implements TeamResource {
         Team team = getTeam(newValuesTeamDto);
 
         if (!team.isActive() & !newValuesTeamDto.isActive()) {
-            throw new ForbiddenOperationException(Response.status(CONFLICT).entity(
-                    String.format("Cannot update Team '%d'. Team is inactive.", team.getId())).build());
+            throw new ForbiddenOperationException(String.format(
+                    "Cannot update Team '%d'. Team is inactive.", team.getId()));
         }
 
         if (!team.isActive()) {
