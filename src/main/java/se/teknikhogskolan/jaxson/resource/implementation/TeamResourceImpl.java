@@ -1,9 +1,5 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-
-import static se.teknikhogskolan.jaxson.model.ModelParser.teamModelFrom;
-import static se.teknikhogskolan.jaxson.model.ModelParser.teamModelsFromTeams;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -13,12 +9,10 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
-
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.resource.TeamResource;
 import se.teknikhogskolan.springcasemanagement.model.Team;
-
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 
@@ -43,19 +37,51 @@ public class TeamResourceImpl implements TeamResource {
     @Override
     public Response createTeam(TeamDto teamDto) {
         Team team = teamService.create(teamDto.getName());
+        System.out.println("created " + team.getId() + ", " + team.getName());
         updateTeam(teamDto);
-        return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + teamDto.getId()).build();
+        return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + team.getId()).build();
     }
 
     @Override
-    public Response getTeam(Long id) {
+    public Response updateTeam(TeamDto newValuesTeamDto) {
+        Team team;
+        if (weHave(newValuesTeamDto.getId())) {
+            team = teamService.getById(newValuesTeamDto.getId());
+        } else if (weHave(newValuesTeamDto.getName())) {
+            team = teamService.getByName(newValuesTeamDto.getName());
+        } else return Response.status(Response.Status.NOT_FOUND).build();
+        if (!team.isActive() & !newValuesTeamDto.isActive()) {
+            return Response.status(Response.Status.BAD_REQUEST).header("Cause", "Team is inactive").build();
+        }
+
+        if (!team.isActive()){
+            teamService.activateTeam(team.getId());
+        }
+        if (newValuesTeamDto.getName() != team.getName()) {
+            teamService.updateName(team.getId(), newValuesTeamDto.getName());
+        }
+        if (!newValuesTeamDto.isActive()) {
+            teamService.inactivateTeam(team.getId());
+        }
+
+        return Response.accepted().build();
+    }
+
+    @Override
+    public Response getTeam(Long id) { // TODO paging if getAll, conflict if getOne
         if (weHave(id)) {
             Team team = teamService.getById(id);
-            TeamDto teamDto = teamModelFrom(team);
+            TeamDto teamDto = new TeamDto(team);
             return Response.ok(teamDto).build();
         }
-        Collection<TeamDto> teamDtos = teamModelsFromTeams(teamService.getAll());
+        Collection<TeamDto> teamDtos = dtosFromTeams(teamService.getAll());
         return Response.ok(teamDtos).build();
+    }
+
+    private Collection<TeamDto> dtosFromTeams(Iterable<Team> teams) {
+        Collection<TeamDto> teamDtos = new ArrayList<>();
+        teams.forEach(team -> teamDtos.add(new TeamDto(team)));
+        return teamDtos;
     }
 
     private boolean weHave(Object object) {
@@ -77,33 +103,5 @@ public class TeamResourceImpl implements TeamResource {
             return Response.ok(uris).build();
         }
         return Response.ok(userDtos).build();
-    }
-
-    @Override
-    public Response updateTeam(TeamDto teamDto) {
-
-        Team team;
-        if (weHave(teamDto.getId())) {
-            team = teamService.getById(teamDto.getId());
-        } else if (weHave(teamDto.getName())) {
-            team = teamService.getByName(teamDto.getName());
-        } else return Response.status(Response.Status.BAD_REQUEST).build();
-
-        if (teamDto.getName() != team.getName()) {
-            teamService.updateName(team.getId(), teamDto.getName());
-        }
-
-        if (!teamDto.isActive()) {
-            teamService.inactivateTeam(team.getId());
-        } else {
-            teamService.activateTeam(team.getId());
-        }
-
-        Collection<Long> userIds = teamDto.getUsersId();
-        if (weHave(userIds)) {
-            userIds.forEach(userId -> teamService.addUserToTeam(team.getId(), userId));
-        }
-
-        return Response.accepted().build();
     }
 }

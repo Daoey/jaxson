@@ -6,19 +6,31 @@ import java.util.Collection;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 
 public final class TeamDto extends AbstractModel {
-    private String name;
-    private Collection<Long> usersId;
-    private boolean active;
 
-    public TeamDto(String name, Collection<Long> usersId, boolean active) {
+    private String name;
+
+    private Collection<Long> usersId;
+
+    private Boolean active;
+
+    public TeamDto(String name, Collection<Long> usersId, Boolean active) {
         this.name = name;
         this.usersId = usersId;
         this.active = active;
     }
 
+    public TeamDto(Team team) {
+        setId(team.getId());
+        this.name = team.getName();
+        this.active = team.isActive();
+        this.usersId = setUsersId(team);
+        setCreated(team.getCreated());
+        setLastModified(team.getLastModified());
+    }
+
     public TeamDto(){}
 
-    public Collection<Long> setUsersId(Team team) {
+    private Collection<Long> setUsersId(Team team) {
         Collection<Long> result = new ArrayList<>();
         if (null != team.getUsers()) {
             team.getUsers().forEach(user -> result.add(user.getId()));
