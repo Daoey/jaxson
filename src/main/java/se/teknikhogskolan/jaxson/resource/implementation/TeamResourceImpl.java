@@ -1,7 +1,5 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -20,8 +18,6 @@ import se.teknikhogskolan.jaxson.resource.TeamResource;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
-
-
 
 public class TeamResourceImpl implements TeamResource {
 

@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 
 import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.IllegalArgumentExceptionMapper;
+import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NoSearchResultExceptionMapper;
 import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.WorkItemResourceImpl;
-
 
 @Component
 @ApplicationPath("jaxson")
@@ -24,5 +24,6 @@ public final class JerseyConfig extends ResourceConfig {
         register(DatabaseExceptionMapper.class);
         register(NoSearchResultExceptionMapper.class);
         register(IllegalArgumentExceptionMapper.class);
+        register(MaximumQuantityExceptionMapper.class);
     }
 }

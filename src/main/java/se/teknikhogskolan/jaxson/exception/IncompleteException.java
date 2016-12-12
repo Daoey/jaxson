@@ -1,18 +1,15 @@
 package se.teknikhogskolan.jaxson.exception;
 
-public final class IncompleteException extends RuntimeException {
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
 
-    private static final long serialVersionUID = -7716548302889493612L;
+import javax.ws.rs.WebApplicationException;
+import javax.ws.rs.core.Response;
 
-    public IncompleteException(String message, Throwable cause) {
-        super(message, cause);
-    }
+public final class IncompleteException extends WebApplicationException {
+
+    private static final long serialVersionUID = 1L;
 
     public IncompleteException(String message) {
-        super(message);
-    }
-
-    public IncompleteException() {
-        super();
+        super(Response.status(BAD_REQUEST).entity(message).build());
     }
 }

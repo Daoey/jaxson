@@ -1,17 +1,15 @@
 package se.teknikhogskolan.jaxson.exception;
 
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-
-import se.teknikhogskolan.jaxson.model.ErrorMessage;
 
 public final class InsufficientJsonBodyException extends WebApplicationException {
 
-    private static final long serialVersionUID = 8921460702643087166L;
+    private static final long serialVersionUID = 1L;
 
     public InsufficientJsonBodyException(String message) {
-        super(Response.status(Status.BAD_REQUEST).entity(new ErrorMessage(message)).build());
+        super(Response.status(BAD_REQUEST).entity(message).build());
     }
-
 }
