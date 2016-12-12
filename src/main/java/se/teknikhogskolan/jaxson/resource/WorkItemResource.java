@@ -55,10 +55,6 @@ public interface WorkItemResource {
     @Path("{id}/issue")
     Response updateAssignedIssue(@PathParam("id") Long id, IssueDto issue);
     
-    @PUT
-    @Path("{id}/users")
-    Response assignUserToWorkItem(@PathParam("id") Long id, WorkItemDto workItem);
-    
     @GET
     @Path("/issue")
     Response getAllWorkItemsWithIssue();

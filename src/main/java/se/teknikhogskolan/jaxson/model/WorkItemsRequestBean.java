@@ -17,15 +17,9 @@ public final class WorkItemsRequestBean {
     private @QueryParam("page") @DefaultValue("0") int page;
     private @QueryParam("size") @DefaultValue("10") int size;
     private @QueryParam("description") String description;
-    // private @QueryParam("userNumber") Long userNumber; //TODO get from
-    // users/{id}/workItems instead!
     private @QueryParam("status") String status;
     private @QueryParam("createdAfter") String createdAfter;
     private @QueryParam("createdBefore") String createdBefore;
-    // private @QueryParam("teamId") Long teamId; //TODO get from
-    // teams/{id}/workItems instead!
-    // private @QueryParam("hasIssue") Boolean hasIssue; //TODO consider getting
-    // from workItems/issue
     private @QueryParam("completedAfter") String completedAfter;
     private @QueryParam("completedBefore") String completedBefore;
 

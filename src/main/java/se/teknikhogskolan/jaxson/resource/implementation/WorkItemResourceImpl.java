@@ -15,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.exception.ConflictException;
 import se.teknikhogskolan.jaxson.exception.IncompleteException;
+import se.teknikhogskolan.jaxson.exception.InsufficientJsonBodyException;
 import se.teknikhogskolan.jaxson.model.IssueDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.model.WorkItemsRequestBean;
@@ -44,6 +45,12 @@ public final class WorkItemResourceImpl implements WorkItemResource {
      */
     @Override
     public Response createWorkItem(WorkItemDto workItem) {
+
+        if (workItem == null || workItem.getDescription() == null) {
+            throw new InsufficientJsonBodyException(
+                    "Can not create work item without JSON body containing description");
+        }
+
         WorkItem workItemDao = workItemService.create(workItem.getDescription());
         URI location = uriInfo.getAbsolutePathBuilder().path(workItemDao.getId().toString()).build();
         return Response.created(location).build();
@@ -59,13 +66,25 @@ public final class WorkItemResourceImpl implements WorkItemResource {
 
     /*
      * http://127.0.0.1:8080/jaxson/workitems/1 JSON body for changing a
-     * workItem status to DONE (to allow issue assignment) {"status": "DONE"}
+     * workItem status to DONE (to allow issue assignment) {"status": "DONE"
+     * "issueId": 1}
      */
     @Override
     public Response updateWorkItem(Long id, WorkItemDto workItem) {
-        if (workItem.getStatus() != null) {
-            workItemService.setStatus(id, workItem.getStatus());
+
+        if (workItem == null || workItem.getStatus() == null) {
+            throw new InsufficientJsonBodyException("Can not update work item without JSON body containing status");
         }
+
+        workItemService.setStatus(id, workItem.getStatus());
+
+        //TODO decide if this check is needed
+        // if (workItem.getStatus() ==
+        // se.teknikhogskolan.springcasemanagement.model.WorkItem.Status.DONE
+        // && workItem.getId() != null) {
+        // issueService.inactivate(workItem.getIssueId());
+        // }
+
         return Response.ok().build();
     }
 
@@ -153,6 +172,11 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     // {"description": "some issue description"}
     @Override
     public Response createAndAssignIssue(Long id, IssueDto issue) {
+
+        if (issue == null || issue.getDescription() == null) {
+            throw new InsufficientJsonBodyException("Can not create issue without JSON body containing description");
+        }
+
         Issue issueDao = workItemService.createIssue(issue.getDescription());
         workItemService.addIssueToWorkItem(issueDao.getId(), id);
         URI location = uriInfo.getAbsolutePath();
@@ -168,9 +192,9 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         if (workItem.getIssue() == null) {
             throw new NoSearchResultException("No issue assigned to workItem with id " + id);
         }
-        
+
         IssueDto issueDto = new IssueDto(workItem.getIssue());
-        
+
         return Response.ok(issueDto).build();
     }
 
@@ -178,6 +202,12 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     // {"id": 1,"description": "some new issue description"}
     @Override
     public Response updateAssignedIssue(Long id, IssueDto issue) {
+
+        if (issue == null || issue.getId() == null || issue.getDescription() == null) {
+            throw new InsufficientJsonBodyException(
+                    "Can not update issue. Need JSON body containing issue id and description");
+        }
+
         issueService.updateDescription(issue.getId(), issue.getDescription());
         return Response.ok().build();
     }
@@ -190,19 +220,10 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     }
 
     // http://127.0.0.1:8080/jaxson/workitems/issue
-    //TODO Consider if there is a better URI option for this method
     @Override
     public Response getAllWorkItemsWithIssue() {
         Collection<WorkItem> workItems = workItemService.getAllWithIssue();
         return convertCollectionToResponse(workItems);
     }
 
-    //http://127.0.0.1:8080/jaxson/workitems/{id}/users
-    //{"userNumber": 1}
-    //TODO Consider if there is a better URI option for this method
-    @Override
-    public Response assignUserToWorkItem(Long id, WorkItemDto workItem) {
-        workItemService.setUser(workItem.getUserNumber(), id);
-        return Response.status(Status.NO_CONTENT).build();
-    }
 }
