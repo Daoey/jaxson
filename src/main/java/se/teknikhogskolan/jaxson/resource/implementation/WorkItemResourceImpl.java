@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.exception.ConflictException;
 import se.teknikhogskolan.jaxson.exception.IncompleteException;
-import se.teknikhogskolan.jaxson.exception.InsufficientJsonBodyException;
 import se.teknikhogskolan.jaxson.model.IssueDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.model.WorkItemsRequestBean;
@@ -47,8 +46,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     public Response createWorkItem(WorkItemDto workItem) {
 
         if (workItem == null || workItem.getDescription() == null) {
-            throw new InsufficientJsonBodyException(
-                    "Can not create work item without JSON body containing description");
+            throw new IncompleteException("Can not create work item without JSON body containing description");
         }
 
         WorkItem workItemDao = workItemService.create(workItem.getDescription());
@@ -73,12 +71,12 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     public Response updateWorkItem(Long id, WorkItemDto workItem) {
 
         if (workItem == null || workItem.getStatus() == null) {
-            throw new InsufficientJsonBodyException("Can not update work item without JSON body containing status");
+            throw new IncompleteException("Can not update work item without JSON body containing status");
         }
 
         workItemService.setStatus(id, workItem.getStatus());
 
-        //TODO decide if this check is needed
+        // TODO decide if this check is needed
         // if (workItem.getStatus() ==
         // se.teknikhogskolan.springcasemanagement.model.WorkItem.Status.DONE
         // && workItem.getId() != null) {
@@ -174,7 +172,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     public Response createAndAssignIssue(Long id, IssueDto issue) {
 
         if (issue == null || issue.getDescription() == null) {
-            throw new InsufficientJsonBodyException("Can not create issue without JSON body containing description");
+            throw new IncompleteException("Can not create issue without JSON body containing description");
         }
 
         Issue issueDao = workItemService.createIssue(issue.getDescription());
@@ -204,8 +202,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     public Response updateAssignedIssue(Long id, IssueDto issue) {
 
         if (issue == null || issue.getId() == null || issue.getDescription() == null) {
-            throw new InsufficientJsonBodyException(
-                    "Can not update issue. Need JSON body containing issue id and description");
+            throw new IncompleteException("Can not update issue. Need JSON body containing issue id and description");
         }
 
         issueService.updateDescription(issue.getId(), issue.getDescription());
