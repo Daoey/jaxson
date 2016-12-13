@@ -1,21 +1,17 @@
 package se.teknikhogskolan.resource;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
+
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.springcasemanagement.model.User;
-import se.teknikhogskolan.springcasemanagement.repository.UserRepository;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
-import java.util.function.Consumer;
 
 import static org.junit.Assert.assertEquals;
 
@@ -24,6 +20,7 @@ public class TestUserResource {
     private static Client client;
     private final String baseUrl = "http://localhost:8080/jaxson/";
     private UserDto userInDb;
+
     @BeforeClass
     public static void initialize() {
         client = ClientBuilder.newClient();
