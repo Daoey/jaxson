@@ -45,13 +45,19 @@ public class TeamResourceImpl implements TeamResource {
 
     @Override
     public Response updateTeam(TeamDto newValuesTeamDto) {
+
         Team team = getTeam(newValuesTeamDto);
 
         if (!team.isActive() & !newValuesTeamDto.isActive()) {
             throw new ForbiddenOperationException(String.format(
-                    "Cannot update Team '%d'. Team is inactive.", team.getId()));
+                    "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
+        } else {
+            update(team, newValuesTeamDto);
+            return Response.accepted().build();
         }
+    }
 
+    private void update(Team team, TeamDto newValuesTeamDto) {
         if (!team.isActive()) {
             teamService.activateTeam(team.getId());
         }
@@ -61,8 +67,6 @@ public class TeamResourceImpl implements TeamResource {
         if (!newValuesTeamDto.isActive()) {
             teamService.inactivateTeam(team.getId());
         }
-
-        return Response.accepted().build();
     }
 
     private Team getTeam(TeamDto teamDto) {
