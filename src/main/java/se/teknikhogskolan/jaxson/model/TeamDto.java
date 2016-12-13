@@ -31,17 +31,12 @@ public final class TeamDto extends AbstractModel {
 
     public TeamDto(){}
 
-    @JsonIgnore
     private Collection<Long> setUsersId(Team team) {
         Collection<Long> result = new ArrayList<>();
         if (null != team.getUsers()) {
             team.getUsers().forEach(user -> result.add(user.getId()));
         }
         return result;
-    }
-
-    public void setUsersId(Collection<Long> usersId) {
-        this.usersId = usersId;
     }
 
     public String getName() {

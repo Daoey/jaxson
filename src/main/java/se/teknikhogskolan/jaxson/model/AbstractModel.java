@@ -27,11 +27,11 @@ public abstract class AbstractModel {
         return id;
     }
 
-    String getCreated() {
+    public String getCreated() {
         return created;
     }
 
-    String getLastModified() {
+    public String getLastModified() {
         return lastModified;
     }
 
@@ -39,19 +39,11 @@ public abstract class AbstractModel {
         this.id = id;
     }
 
-    void setCreated(LocalDate created) {
+    public void setCreated(LocalDate created) {
         this.created = (null == created ? null : created.format(formatter));
     }
 
-    public void setCreated(String created) {
-        this.created = created;
-    }
-
-    void setLastModified(LocalDate lastModified) {
+    public void setLastModified(LocalDate lastModified) {
         this.lastModified = (null == lastModified ? null : lastModified.format(formatter));
-    }
-
-    public void setLastModified(String lastModified) {
-        this.lastModified = lastModified;
     }
 }

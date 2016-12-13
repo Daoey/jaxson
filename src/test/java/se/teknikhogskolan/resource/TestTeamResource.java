@@ -2,7 +2,7 @@ package se.teknikhogskolan.resource;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
-import se.teknikhogskolan.jaxson.model.TeamDto;
+import se.teknikhogskolan.model.TeamViewBean;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -26,8 +26,9 @@ public class TestTeamResource {
         Long teamId = 14L;
         WebTarget target = client.target(webAppUrl).path(resource).path(teamId.toString());
 
-        TeamDto teamDto = target.request(MediaType.APPLICATION_JSON_TYPE).get(TeamDto.class);
+        TeamViewBean teamViewBean = target.request(MediaType.APPLICATION_JSON_TYPE).get(TeamViewBean.class);
 
-        assertEquals(teamId, teamDto.getId());
+        System.out.println(teamViewBean);
+        assertEquals(teamId, teamViewBean.getId());
     }
 }
