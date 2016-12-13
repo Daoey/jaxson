@@ -33,5 +33,5 @@ public interface TeamResource {
 
     @GET
     @Path("{id}/users")
-    Response getUsersInTeam(@PathParam("id") Long id, @QueryParam("asLocations") boolean asLocations);
+    Collection<UserDto> getUsersInTeam(@PathParam("id") Long id);
 }

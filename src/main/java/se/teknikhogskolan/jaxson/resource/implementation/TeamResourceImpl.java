@@ -137,14 +137,9 @@ public class TeamResourceImpl implements TeamResource {
     }
 
     @Override
-    public Response getUsersInTeam(Long id, boolean asLocations) {
-        List<UserDto> userDtos = new ArrayList<>();
+    public Collection<UserDto> getUsersInTeam(Long id) {
+        Collection<UserDto> userDtos = new ArrayList<>();
         userService.getAllByTeamId(id).forEach(user -> userDtos.add(new UserDto(user)));
-        if (asLocations) {
-            List<String> uris = new ArrayList<>();
-            userDtos.forEach(u -> uris.add(String.format("../users/%d", u.getId())));
-            return Response.ok(uris).build();
-        }
-        return Response.ok(userDtos).build();
+        return userDtos;
     }
 }
