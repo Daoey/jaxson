@@ -2,7 +2,6 @@ package se.teknikhogskolan.jaxson.resource.implementation;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.BeanParam;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
@@ -40,24 +39,27 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public UserDto getUserByUserNumber(Long userNumber) {
-        return new UserDto(userService.getByUserNumber(userNumber));
+    public Response getUserByUserNumber(Long userNumber) {
+        UserDto userDto = new UserDto(userService.getByUserNumber(userNumber));
+        return Response.ok(userDto).build();
     }
 
     @Override
-    public UserDto updateUser(Long userNumber, boolean active, UserDto userDto) {
+    public Response updateUser(Long userNumber, boolean active, UserDto userDto) {
         UserDto updatedUser = updateUserInformation(userDto, userNumber);
         if (updatedUser != null) {
-            return updatedUser;
+            return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
+                    .path(userDto.getUserNumber().toString()).build()).build();
         } else {
+            //TODO update this to the most resent exception
             throw new IncompleteException("Could not find any username,"
                     + " firstname or lastname in the request.");
         }
     }
 
     @Override
-    public List<UserDto> getAll(@BeanParam PageRequestBean pageRequestBean,
-                                @BeanParam UserRequestBean userRequestBean) {
+    public Response getAll(@BeanParam PageRequestBean pageRequestBean,
+                           @BeanParam UserRequestBean userRequestBean) {
         List<UserDto> userDtos = new ArrayList<>();
         if (!userRequestBean.getUsername().equals("") || !userRequestBean.getFirtname().equals("")
                 || !userRequestBean.getLastname().equals("")) {
@@ -67,7 +69,7 @@ public class UserResourceImpl implements UserResource {
             userService.getAllByPage(pageRequestBean.getPage(),
                     pageRequestBean.getSize()).forEach(user -> userDtos.add(new UserDto(user)));
         }
-        return userDtos;
+        return Response.ok(userDtos).build();
     }
 
     @Override
@@ -79,17 +81,19 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public List<WorkItemDto> getAllWorkItemsFromUser(Long userNumber) {
+    public Response getAllWorkItemsFromUser(Long userNumber) {
         List<WorkItemDto> workItemDtos = new ArrayList<>();
         workItemService.getByUsernumber(userNumber).forEach(workItem -> workItemDtos.add(new WorkItemDto(workItem)));
-        return workItemDtos;
+        return Response.ok(workItemDtos).build();
     }
 
     @Override
-    public WorkItemDto assignWorkItemToUser(Long userNumber, WorkItemDto workItemDto) {
+    public Response assignWorkItemToUser(Long userNumber, WorkItemDto workItemDto) {
         if (workItemDto.getId() != null) {
-            return new WorkItemDto(workItemService.setUser(userNumber, workItemDto.getId()));
+            return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
+                    .path(userNumber.toString()).build()).build();
         }
+        //TODO change to the most resent exception
         throw new IncompleteException("Could not find any WorkItem id in the request.");
     }
 

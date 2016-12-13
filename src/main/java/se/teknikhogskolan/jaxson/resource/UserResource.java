@@ -31,16 +31,16 @@ public interface UserResource {
 
     @GET
     @Path("{userNumber}")
-    UserDto getUserByUserNumber(@PathParam("userNumber") Long userNumber);
+    Response getUserByUserNumber(@PathParam("userNumber") Long userNumber);
 
     @PUT
     @Path("{userNumber}")
-    UserDto updateUser(@PathParam("userNumber") Long userNumber,
+    Response updateUser(@PathParam("userNumber") Long userNumber,
                        @QueryParam("active") boolean active, UserDto user);
 
     //TODO merge getByCreationDate and GetAll
     @GET
-    List<UserDto> getAll(@BeanParam PageRequestBean pageRequestBean,
+    Response getAll(@BeanParam PageRequestBean pageRequestBean,
                          @BeanParam UserRequestBean userRequestBean);
 
     @GET
@@ -50,9 +50,9 @@ public interface UserResource {
 
     @GET
     @Path("{userNumber}/workitems")
-    List<WorkItemDto> getAllWorkItemsFromUser(@PathParam("userNumber") Long userNumber);
+    Response getAllWorkItemsFromUser(@PathParam("userNumber") Long userNumber);
 
     @PUT
     @Path("{userNumber}/workItems")
-    WorkItemDto assignWorkItemToUser(@PathParam("userNumber") Long userNumber, WorkItemDto workItemDto);
+    Response assignWorkItemToUser(@PathParam("userNumber") Long userNumber, WorkItemDto workItemDto);
 }
