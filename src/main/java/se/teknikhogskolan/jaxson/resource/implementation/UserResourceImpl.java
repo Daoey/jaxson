@@ -56,8 +56,8 @@ public class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public List<UserDto> getAllByPage(@BeanParam PageRequestBean pageRequestBean,
-                                      @BeanParam UserRequestBean userRequestBean) {
+    public List<UserDto> getAll(@BeanParam PageRequestBean pageRequestBean,
+                                @BeanParam UserRequestBean userRequestBean) {
         List<UserDto> userDtos = new ArrayList<>();
         if (!userRequestBean.getUsername().equals("") || !userRequestBean.getFirtname().equals("")
                 || !userRequestBean.getLastname().equals("")) {

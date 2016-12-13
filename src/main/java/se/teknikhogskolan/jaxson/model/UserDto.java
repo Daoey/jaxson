@@ -1,9 +1,9 @@
 package se.teknikhogskolan.jaxson.model;
 
-import se.teknikhogskolan.springcasemanagement.model.User;
-
 import java.util.ArrayList;
 import java.util.Collection;
+
+import se.teknikhogskolan.springcasemanagement.model.User;
 
 public final class UserDto extends AbstractModel {
 
@@ -27,8 +27,11 @@ public final class UserDto extends AbstractModel {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.active = user.isActive();
-        this.teamId = user.getTeam().getId();
         this.workItemsId = setWorkItemsId(user);
+
+        if (user.getTeam() != null) {
+            this.teamId = user.getTeam().getId();
+        }
     }
 
     private Collection<Long> setWorkItemsId(User user) {
