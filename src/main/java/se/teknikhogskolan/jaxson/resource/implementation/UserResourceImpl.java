@@ -10,6 +10,7 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import se.teknikhogskolan.jaxson.exception.InsufficientJsonBodyException;
 import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserDto;
@@ -49,7 +50,8 @@ public class UserResourceImpl implements UserResource {
         if (updatedUser != null) {
             return updatedUser;
         } else {
-            throw new BadRequestException();
+            throw new InsufficientJsonBodyException("Could not find any username,"
+                    + " firstname or lastname in the request.");
         }
     }
 
@@ -88,7 +90,7 @@ public class UserResourceImpl implements UserResource {
         if (workItemDto.getId() != null) {
             return new WorkItemDto(workItemService.setUser(userNumber, workItemDto.getId()));
         }
-        throw new BadRequestException("Could not find any WorkItem id in the request.");
+        throw new InsufficientJsonBodyException("Could not find any WorkItem id in the request.");
     }
 
     private UserDto updateUserInformation(UserDto userDto, Long userNumber) {
