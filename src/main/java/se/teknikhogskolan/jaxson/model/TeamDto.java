@@ -3,6 +3,7 @@ package se.teknikhogskolan.jaxson.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 
 public final class TeamDto extends AbstractModel {
@@ -30,12 +31,17 @@ public final class TeamDto extends AbstractModel {
 
     public TeamDto(){}
 
+    @JsonIgnore
     private Collection<Long> setUsersId(Team team) {
         Collection<Long> result = new ArrayList<>();
         if (null != team.getUsers()) {
             team.getUsers().forEach(user -> result.add(user.getId()));
         }
         return result;
+    }
+
+    public void setUsersId(Collection<Long> usersId) {
+        this.usersId = usersId;
     }
 
     public String getName() {
@@ -73,7 +79,6 @@ public final class TeamDto extends AbstractModel {
 
     @Override
     public int hashCode() {
-        int result = 31 + name.hashCode();
-        return result;
+        return  31 + name.hashCode();
     }
 }

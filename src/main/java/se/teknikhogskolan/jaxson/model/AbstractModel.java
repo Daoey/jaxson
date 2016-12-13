@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 public abstract class AbstractModel {
 
-    protected final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private Long id;
 
@@ -27,23 +27,31 @@ public abstract class AbstractModel {
         return id;
     }
 
-    public String getCreated() {
+    String getCreated() {
         return created;
     }
 
-    public String getLastModified() {
+    String getLastModified() {
         return lastModified;
     }
 
-    public void setId(Long id) {
+    void setId(Long id) {
         this.id = id;
     }
 
-    public void setCreated(LocalDate created) {
+    void setCreated(LocalDate created) {
         this.created = (null == created ? null : created.format(formatter));
     }
 
-    public void setLastModified(LocalDate lastModified) {
+    public void setCreated(String created) {
+        this.created = created;
+    }
+
+    void setLastModified(LocalDate lastModified) {
         this.lastModified = (null == lastModified ? null : lastModified.format(formatter));
+    }
+
+    public void setLastModified(String lastModified) {
+        this.lastModified = lastModified;
     }
 }
