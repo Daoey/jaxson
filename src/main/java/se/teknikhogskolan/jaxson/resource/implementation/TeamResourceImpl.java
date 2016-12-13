@@ -2,7 +2,6 @@ package se.teknikhogskolan.jaxson.resource.implementation;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 import javax.ws.rs.NotFoundException;
 import javax.ws.rs.core.Context;
