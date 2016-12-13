@@ -25,10 +25,7 @@ public class TestTeamResource {
     public void canGetTeamById() {
         Long teamId = 14L;
         WebTarget target = client.target(webAppUrl).path(resource).path(teamId.toString());
-
         TeamViewBean teamViewBean = target.request(MediaType.APPLICATION_JSON_TYPE).get(TeamViewBean.class);
-
-        System.out.println(teamViewBean);
         assertEquals(teamId, teamViewBean.getId());
     }
 }
