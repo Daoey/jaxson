@@ -58,15 +58,27 @@ public class TeamResourceImpl implements TeamResource {
     }
 
     private void update(Team team, TeamDto newValuesTeamDto) {
-        if (!team.isActive()) {
+        if (activationNeededToUpdate(team)) {
             teamService.activateTeam(team.getId());
         }
-        if (newValuesTeamDto.getName() != team.getName()) {
+        if (nameNeedsToBeSyncedBetween(team, newValuesTeamDto)) {
             teamService.updateName(team.getId(), newValuesTeamDto.getName());
         }
-        if (!newValuesTeamDto.isActive()) {
+        if (activeStatusDiffersFrom(newValuesTeamDto)) {
             teamService.inactivateTeam(team.getId());
         }
+    }
+
+    private boolean activationNeededToUpdate(Team team) {
+        return !team.isActive();
+    }
+
+    private boolean nameNeedsToBeSyncedBetween(Team team, TeamDto newValuesTeamDto) {
+        return newValuesTeamDto.getName() != team.getName();
+    }
+
+    private boolean activeStatusDiffersFrom(TeamDto newValuesTeamDto) {
+        return !newValuesTeamDto.isActive();
     }
 
     private Team getTeam(TeamDto teamDto) {
