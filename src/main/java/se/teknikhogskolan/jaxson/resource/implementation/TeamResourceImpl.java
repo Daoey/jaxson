@@ -16,6 +16,7 @@ import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.resource.TeamResource;
 import se.teknikhogskolan.springcasemanagement.model.Team;
+import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 
@@ -31,9 +32,22 @@ public class TeamResourceImpl implements TeamResource {
     private UriInfo uriInfo;
 
     @Override
-    public Response addUserToTeam(Long teamId, Long userId) {
-        teamService.addUserToTeam(teamId, userId);
-        return Response.accepted().build();
+    public Response addUserToTeam(Long teamId, UserDto userDto) {
+        Long userId = userDto.getId();
+        Long userNumber = userDto.getUserNumber();
+
+        if (weHave(userId) && weHave(teamId)) {
+
+            teamService.addUserToTeam(teamId, userId);
+            return Response.accepted().build();
+
+        } else if (weHave(userNumber) && weHave(teamId)) {
+
+            User user = userService.getByUserNumber(userNumber);
+            teamService.addUserToTeam(teamId, user.getId());
+            return Response.accepted().build();
+
+        } else throw new IncompleteException(String.format("No user id or user number found in request."));
     }
 
     @Override
