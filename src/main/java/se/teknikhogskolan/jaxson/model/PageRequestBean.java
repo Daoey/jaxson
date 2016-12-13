@@ -5,18 +5,18 @@ import javax.ws.rs.QueryParam;
 
 public class PageRequestBean {
 
-	@QueryParam("page")
-	private int page;
-	
-	@QueryParam("size")
-	@DefaultValue("10")
-	private int size;
+    @QueryParam("page")
+    private int page;
 
-	public int getPage() {
-		return page;
-	}
+    @QueryParam("size")
+    @DefaultValue("10")
+    private int size;
 
-	public int getSize() {
-		return size;
-	}
+    public int getPage() {
+        return page;
+    }
+
+    public int getSize() {
+        return size;
+    }
 }
