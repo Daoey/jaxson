@@ -1,5 +1,7 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import java.util.Collection;
+
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
@@ -16,7 +18,11 @@ public interface TeamResource {
     Response createTeam(TeamDto teamDto);
 
     @GET
-    Response getTeam(@QueryParam("id") Long id);
+    Collection<TeamDto> getTeams();
+
+    @GET
+    @Path("{id}")
+    TeamDto getTeam(@PathParam("id") Long id);
 
     @PUT
     Response updateTeam(TeamDto teamDto);

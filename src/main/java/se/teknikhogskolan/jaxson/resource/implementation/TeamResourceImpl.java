@@ -60,7 +60,7 @@ public class TeamResourceImpl implements TeamResource {
     @Override
     public Response updateTeam(TeamDto newValuesTeamDto) {
 
-        Team team = getTeam(newValuesTeamDto);
+        Team team = getAsTeam(newValuesTeamDto);
 
         if (!team.isActive() & !newValuesTeamDto.isActive()) {
             throw new ForbiddenOperationException(String.format(
@@ -95,7 +95,7 @@ public class TeamResourceImpl implements TeamResource {
         return !newValuesTeamDto.isActive();
     }
 
-    private Team getTeam(TeamDto teamDto) {
+    private Team getAsTeam(TeamDto teamDto) {
         Team team;
         if (weHave(teamDto.getId())) {
             team = teamService.getById(teamDto.getId());
@@ -112,14 +112,13 @@ public class TeamResourceImpl implements TeamResource {
     }
 
     @Override
-    public Response getTeam(Long id) { // TODO paging if getAll, conflict if getOne
-        if (weHave(id)) {
-            Team team = teamService.getById(id);
-            TeamDto teamDto = new TeamDto(team);
-            return Response.ok(teamDto).build();
-        }
-        Collection<TeamDto> teamDtos = dtosFromTeams(teamService.getAll());
-        return Response.ok(teamDtos).build();
+    public Collection<TeamDto> getTeams() {
+        return dtosFromTeams(teamService.getAll());
+    }
+
+    @Override
+    public TeamDto getTeam(Long id) {
+        return new TeamDto(teamService.getById(id));
     }
 
     private Collection<TeamDto> dtosFromTeams(Iterable<Team> teams) {
