@@ -70,4 +70,12 @@ public final class WorkItemDto extends AbstractModel {
         return userNumber;
     }
 
+    @Override
+    public String toString() {
+        return "WorkItemDto [description=" + description + ", status=" + status + ", completionDate=" + completionDate
+                + ", issueId=" + issueId + ", userId=" + userId + ", userNumber=" + userNumber + "]";
+    }
+
+    
+    
 }
