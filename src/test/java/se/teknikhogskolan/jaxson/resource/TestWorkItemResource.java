@@ -1,4 +1,4 @@
-package se.teknikhogskolan.resource;
+package se.teknikhogskolan.jaxson.resource;
 
 import static org.junit.Assert.assertEquals;
 

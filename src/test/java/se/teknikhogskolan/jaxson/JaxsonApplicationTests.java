@@ -1,4 +1,4 @@
-package se.teknikhogskolan;
+package se.teknikhogskolan.jaxson;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;

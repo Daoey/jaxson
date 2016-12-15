@@ -1,4 +1,4 @@
-package se.teknikhogskolan.resource;
+package se.teknikhogskolan.jaxson.resource;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
