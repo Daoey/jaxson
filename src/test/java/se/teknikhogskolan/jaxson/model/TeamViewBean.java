@@ -1,4 +1,4 @@
-package se.teknikhogskolan.model;
+package se.teknikhogskolan.jaxson.model;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -15,6 +15,10 @@ public final class TeamViewBean {
 
     public TeamViewBean() {}
 
+    public TeamViewBean(String name) {
+        this.name = name;
+    }
+
     @Override
     public String toString() {
         final StringBuffer sb = new StringBuffer("TeamViewBean{");
@@ -29,15 +33,15 @@ public final class TeamViewBean {
     }
 
     public Long getId() {
-        return new Long(id);
+        return (null == id)? null : new Long(id);
     }
 
     public String getLastModified() {
-        return new String(lastModified);
+        return (null == lastModified)? null : new String(lastModified);
     }
 
     public String getCreated() {
-        return new String(created);
+        return (null == created)? null : new String(created);
     }
 
     public String getName() {
@@ -49,6 +53,10 @@ public final class TeamViewBean {
     }
 
     public Collection<Long> getUsersId() {
-        return new ArrayList<>(usersId);
+        Collection<Long> result = new ArrayList<>();
+        if (null != usersId) {
+            result.addAll(this.usersId);
+        }
+        return result;
     }
 }

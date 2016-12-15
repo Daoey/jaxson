@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -51,9 +52,19 @@ public class TeamResourceImpl implements TeamResource {
 
     @Override
     public Response createTeam(TeamDto teamDto) {
+        if (usersIn(teamDto)) {
+            throw new ForbiddenOperationException(
+                    "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}");
+        }
         Team team = teamService.create(teamDto.getName());
-        updateTeam(teamDto);
-        return Response.status(Response.Status.CREATED).header("Location", "teams?id=" + team.getId()).build();
+        if (null != teamDto.isActive() && !teamDto.isActive()) teamService.inactivateTeam(team.getId());
+
+        URI location = uriInfo.getAbsolutePathBuilder().path(team.getId().toString()).build();
+        return Response.created(location).build();
+    }
+
+    private boolean usersIn(TeamDto teamDto) {
+        return !(null == teamDto.getUsersId() || teamDto.getUsersId().isEmpty());
     }
 
     @Override
@@ -61,7 +72,7 @@ public class TeamResourceImpl implements TeamResource {
 
         Team team = getAsTeam(newValuesTeamDto);
 
-        if (!team.isActive() & !newValuesTeamDto.isActive()) {
+        if (!team.isActive() & (!newValuesTeamDto.isActive())) {
             throw new ForbiddenOperationException(String.format(
                     "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
         } else {

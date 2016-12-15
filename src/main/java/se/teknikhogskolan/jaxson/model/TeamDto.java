@@ -3,7 +3,6 @@ package se.teknikhogskolan.jaxson.model;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 
 public final class TeamDto extends AbstractModel {
@@ -13,6 +12,10 @@ public final class TeamDto extends AbstractModel {
     private Collection<Long> usersId;
 
     private Boolean active;
+
+    public TeamDto(String name) {
+        this.name = name;
+    }
 
     public TeamDto(String name, Collection<Long> usersId, Boolean active) {
         this.name = name;
@@ -24,19 +27,45 @@ public final class TeamDto extends AbstractModel {
         setId(team.getId());
         this.name = team.getName();
         this.active = team.isActive();
-        this.usersId = setUsersId(team);
+        setUsersId(team);
         setCreated(team.getCreated());
         setLastModified(team.getLastModified());
     }
 
     public TeamDto(){}
 
-    private Collection<Long> setUsersId(Team team) {
+    public void setActive(Boolean active) {
+        this.active = (null == active)? true : active;
+    }
+
+    private void setUsersId(Object object) {
+        if (setUsersIdInvokedByTeamConstructor(object)) {
+            handleAsTeam(object); // Team has Collection<User>, User has Long id
+        }
+        if (setUsersIdInvokedByJaxRs(object)) {
+            handleAsCollectionOfLong(object); // Collection<Long> is collection of id
+        }
+    }
+
+    private boolean setUsersIdInvokedByTeamConstructor(Object object) {
+        return object instanceof Team;
+    }
+
+    private void handleAsTeam(Object object) {
+        Team team = (Team) object;
         Collection<Long> result = new ArrayList<>();
         if (null != team.getUsers()) {
             team.getUsers().forEach(user -> result.add(user.getId()));
         }
-        return result;
+        this.usersId = result;
+    }
+
+    private boolean setUsersIdInvokedByJaxRs(Object object) {
+        return object instanceof Collection;
+    }
+
+    private void handleAsCollectionOfLong(Object object) {
+        this.usersId = (Collection<Long>) object;
     }
 
     public String getName() {
@@ -47,7 +76,7 @@ public final class TeamDto extends AbstractModel {
         return usersId;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 
