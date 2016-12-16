@@ -1,11 +1,6 @@
 package se.teknikhogskolan.jaxson.resource;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-
-import se.teknikhogskolan.jaxson.model.UserDto;
-import se.teknikhogskolan.springcasemanagement.model.User;
+import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
@@ -13,7 +8,12 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+
+import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.springcasemanagement.model.User;
 
 public class TestUserResource {
 
@@ -44,14 +44,14 @@ public class TestUserResource {
 
     @Test
     public void canUpdateUser() {
-        //Response response = client.target(baseUrl).path("users/1").request().put();
+        // Response response =
+        // client.target(baseUrl).path("users/1").request().put();
     }
 
     @Test
     public void canCreateUser() throws Exception {
         Response response = client.target(baseUrl).path("users").request()
-                .post(Entity.entity(new User(457L, "canCreateUser", "temp", "temp")
-                        , MediaType.APPLICATION_JSON));
+                .post(Entity.entity(new User(457L, "canCreateUser", "temp", "temp"), MediaType.APPLICATION_JSON));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
     }
@@ -64,6 +64,7 @@ public class TestUserResource {
 
     @Test
     public void canAssignWorkItemToUser() {
-        //Response response = client.target(baseUrl).path("users/1/workitems").request().put();
+        // Response response =
+        // client.target(baseUrl).path("users/1/workitems").request().put();
     }
 }

@@ -3,19 +3,9 @@ package se.teknikhogskolan.jaxson.model;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
-import javax.persistence.Column;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
-
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 public abstract class AbstractModel {
 
-    final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private Long id;
 
@@ -33,6 +23,10 @@ public abstract class AbstractModel {
 
     public String getLastModified() {
         return lastModified;
+    }
+    
+    public DateTimeFormatter getFormatter() {
+        return formatter;
     }
 
     void setId(Long id) {

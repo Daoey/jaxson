@@ -13,7 +13,8 @@ public final class TeamViewBean {
     private boolean active;
     private Collection<Long> usersId;
 
-    public TeamViewBean() {}
+    public TeamViewBean() {
+    }
 
     public TeamViewBean(String name) {
         this.name = name;
@@ -33,15 +34,15 @@ public final class TeamViewBean {
     }
 
     public Long getId() {
-        return (null == id)? null : new Long(id);
+        return (null == id) ? null : new Long(id);
     }
 
     public String getLastModified() {
-        return (null == lastModified)? null : new String(lastModified);
+        return (null == lastModified) ? null : new String(lastModified);
     }
 
     public String getCreated() {
-        return (null == created)? null : new String(created);
+        return (null == created) ? null : new String(created);
     }
 
     public String getName() {

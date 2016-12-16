@@ -29,7 +29,7 @@ public final class WorkItemDto extends AbstractModel {
         status = workItem.getStatus();
 
         if (workItem.getCompletionDate() != null) {
-            completionDate = workItem.getCompletionDate().format(formatter);
+            completionDate = workItem.getCompletionDate().format(getFormatter());
         }
 
         if (workItem.getUser() != null) {

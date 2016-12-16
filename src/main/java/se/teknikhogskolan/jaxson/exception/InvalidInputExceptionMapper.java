@@ -7,7 +7,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import se.teknikhogskolan.springcasemanagement.service.exception.InvalidInputException;
 
-public class InvalidInputExceptionMapper implements ExceptionMapper<InvalidInputException> {
+public final class InvalidInputExceptionMapper implements ExceptionMapper<InvalidInputException> {
 
     @Override
     public Response toResponse(InvalidInputException exception) {

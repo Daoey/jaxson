@@ -7,7 +7,7 @@ import javax.ws.rs.ext.ExceptionMapper;
 
 import se.teknikhogskolan.springcasemanagement.service.exception.MaximumQuantityException;
 
-public class MaximumQuantityExceptionMapper implements ExceptionMapper<MaximumQuantityException> {
+public final class MaximumQuantityExceptionMapper implements ExceptionMapper<MaximumQuantityException> {
 
     @Override
     public Response toResponse(MaximumQuantityException exception) {

@@ -1,10 +1,11 @@
 package se.teknikhogskolan.jaxson.model;
 
-import javax.ws.rs.DefaultValue;
-import javax.ws.rs.QueryParam;
 import java.time.LocalDate;
 
-public class DateRequestBean {
+import javax.ws.rs.DefaultValue;
+import javax.ws.rs.QueryParam;
+
+public final class DateRequestBean {
 
     @QueryParam("startDate")
     @DefaultValue("2016-01-01")
