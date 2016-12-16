@@ -9,13 +9,15 @@ import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import se.teknikhogskolan.jaxson.exception.ForbiddenOperationException;
 import se.teknikhogskolan.jaxson.exception.IncompleteException;
-import se.teknikhogskolan.jaxson.model.DateRequestBean;
 import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.UserRequestBean;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.resource.UserResource;
+import se.teknikhogskolan.springcasemanagement.model.Team;
+import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
@@ -31,11 +33,20 @@ public final class UserResourceImpl implements UserResource {
     private UriInfo uriInfo;
 
     @Override
-    public Response createUser(UserDto user) {
-        UserDto userDto = new UserDto(userService.create(user.getUserNumber(),
-                user.getUsername(), user.getFirstName(), user.getLastName()));
-        return Response.created(uriInfo.getAbsolutePathBuilder()
-                .path(userDto.getUserNumber().toString()).build()).build();
+    public Response createUser(UserDto userDto) {
+        if (noNullParameters(userDto)) {
+            User userDao = userService.create(userDto.getUserNumber(),
+                    userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
+            return Response.created(uriInfo.getAbsolutePathBuilder()
+                    .path(userDao.getUserNumber().toString()).build()).build();
+        }
+        throw new IllegalArgumentException("Can not create User item without JSON body containing"
+                + " UserNumber, username, firstname and lastname");
+    }
+
+    private boolean noNullParameters(UserDto user) {
+        return user.getUserNumber() != null && user.getUsername() != null
+                && user.getFirstName() != null && user.getLastName() != null;
     }
 
     @Override
@@ -45,39 +56,72 @@ public final class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public Response updateUser(Long userNumber, boolean active, UserDto userDto) {
-        UserDto updatedUser = updateUserInformation(userDto, userNumber);
-        if (updatedUser != null) {
-            return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
-                    .path(userDto.getUserNumber().toString()).build()).build();
+    public Response updateUser(Long userNumber, UserDto userDto) {
+        User userDao = userService.getByUserNumber(userNumber);
+        if (activatingInactiveUser(userDao, userDto)) {
+            if (getUpdatedUser(userDao, userDto, userNumber) != null) {
+                return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
+                        .path(userDto.getUserNumber().toString()).build()).build();
+            } else {
+                throw new IncompleteException("Could not find any username,"
+                        + " firstname or lastname in the JSON body of the request.");
+            }
         } else {
-            //TODO update this to the most resent exception
-            throw new IncompleteException("Could not find any username,"
-                    + " firstname or lastname in the request.");
+            throw new ForbiddenOperationException(String.format(
+                    "Cannot update User with id '%d'. Team is inactive.", userDto.getId()));
         }
+    }
+
+    private boolean activatingInactiveUser(User userDao, UserDto userDto) {
+        return userDao.isActive() | userDto.isActive();
+    }
+
+
+    private User getUpdatedUser(User userDao, UserDto userDto, Long userNumber) {
+        User createdUser = null;
+        if (!userDao.isActive()) {
+            userService.activate(userNumber);
+        }
+        createdUser = updateUserInformation(userDto, createdUser, userNumber);
+        if (!userDto.isActive()) {
+            userService.inactivate(userNumber);
+        }
+        return createdUser;
+    }
+
+
+    private User updateUserInformation(UserDto userDto, User createdUser, Long userNumber) {
+        if (userDto.getUsername() != null) {
+            createdUser = userService.updateUsername(userNumber, userDto.getUsername());
+        }
+        if (userDto.getFirstName() != null) {
+            createdUser = userService.updateFirstName(userNumber, userDto.getFirstName());
+        }
+        if (userDto.getLastName() != null) {
+            createdUser = userService.updateLastName(userNumber, userDto.getLastName());
+        }
+        return createdUser;
     }
 
     @Override
     public Response getAll(@BeanParam PageRequestBean pageRequestBean,
                            @BeanParam UserRequestBean userRequestBean) {
         List<UserDto> userDtos = new ArrayList<>();
-        if (!userRequestBean.getUsername().equals("") || !userRequestBean.getFirtname().equals("")
-                || !userRequestBean.getLastname().equals("")) {
-            userService.search(userRequestBean.getFirtname(), userRequestBean.getLastname(),
-                    userRequestBean.getUsername()).forEach(user -> userDtos.add(new UserDto(user)));
-        } else {
+        if (onlyDefaultValues(userRequestBean)) {
             userService.getAllByPage(pageRequestBean.getPage(),
                     pageRequestBean.getSize()).forEach(user -> userDtos.add(new UserDto(user)));
+        } else {
+            userService.search(userRequestBean.getFirtname(), userRequestBean.getLastname(),
+                    userRequestBean.getUsername()).forEach(user -> userDtos.add(new UserDto(user)));
         }
         return Response.ok(userDtos).build();
     }
 
-    @Override
-    public List<UserDto> getByCreationDate(@BeanParam DateRequestBean dateRequestBean) {
-        List<UserDto> userDtos = new ArrayList<>();
-        userService.getByCreationDate(dateRequestBean.getStartDate(),
-                dateRequestBean.getEndDate()).forEach(user -> userDtos.add(new UserDto(user)));
-        return userDtos;
+    private boolean onlyDefaultValues(UserRequestBean userRequestBean) {
+        String defaultValue = "";
+        return defaultValue.equals(userRequestBean.getUsername())
+                && defaultValue.equals(userRequestBean.getFirtname())
+                && defaultValue.equals(userRequestBean.getLastname());
     }
 
     @Override
@@ -90,24 +134,10 @@ public final class UserResourceImpl implements UserResource {
     @Override
     public Response assignWorkItemToUser(Long userNumber, WorkItemDto workItemDto) {
         if (workItemDto.getId() != null) {
+            workItemService.setUser(userNumber, workItemDto.getId());
             return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
                     .path(userNumber.toString()).build()).build();
         }
-        //TODO change to the most resent exception
-        throw new IncompleteException("Could not find any WorkItem id in the request.");
-    }
-
-    private UserDto updateUserInformation(UserDto userDto, Long userNumber) {
-        UserDto createdUser = null;
-        if (userDto.getUsername() != null) {
-            createdUser = new UserDto(userService.updateUsername(userNumber, userDto.getUsername()));
-        }
-        if (userDto.getFirstName() != null) {
-            createdUser = new UserDto(userService.updateFirstName(userNumber, userDto.getFirstName()));
-        }
-        if (userDto.getLastName() != null) {
-            createdUser = new UserDto(userService.updateLastName(userNumber, userDto.getLastName()));
-        }
-        return createdUser;
+        throw new IllegalArgumentException("Could not find any WorkItem id in Json Body of the request.");
     }
 }

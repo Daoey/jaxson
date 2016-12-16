@@ -8,7 +8,6 @@ import java.util.List;
 
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.core.UriInfo;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +23,7 @@ import se.teknikhogskolan.springcasemanagement.model.Issue;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.IssueService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
+import se.teknikhogskolan.springcasemanagement.service.exception.InvalidInputException;
 import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
 import se.teknikhogskolan.springcasemanagement.service.wrapper.Piece;
 
@@ -80,11 +80,11 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     }
 
     // http://127.0.0.1:8080/jaxson/workitems/1
-    // TODO return removed workitem
     @Override
     public Response deleteWorkItem(Long id) {
-        workItemService.removeById(id);
-        return Response.status(Status.NO_CONTENT).build();
+        WorkItem workItemDao = workItemService.removeById(id);
+        WorkItemDto workItemDto = new WorkItemDto(workItemDao);
+        return Response.noContent().entity(workItemDto).build();
     }
 
     @Override
@@ -169,13 +169,18 @@ public final class WorkItemResourceImpl implements WorkItemResource {
             throw new IncompleteException("Can not create issue without JSON body containing description");
         }
 
-        // TODO check if assign issue exists
         if (workItemService.getById(id).getIssue() != null) {
             throw new IllegalArgumentException("Delete assigned issue before reassigning with new issue");
         }
 
         Issue issueDao = workItemService.createIssue(issue.getDescription());
-        workItemService.addIssueToWorkItem(issueDao.getId(), id);
+        try {
+            workItemService.addIssueToWorkItem(issueDao.getId(), id);
+        } catch (InvalidInputException exception) {
+            //Remove issue and throw exception if the assignment fails
+            workItemService.removeIssueFromWorkItem(id);
+            throw exception;
+        }
         URI location = uriInfo.getAbsolutePath();
         return Response.created(location).build();
     }
@@ -211,9 +216,9 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
     @Override
     public Response deleteAssignedIssue(Long id) {
-        // TODO return deleted issue
-        workItemService.removeIssueFromWorkItem(id);
-        return Response.status(Status.NO_CONTENT).build();
+        WorkItem workItemDao = workItemService.removeIssueFromWorkItem(id);
+        WorkItemDto workItemDto = new WorkItemDto(workItemDao);
+        return Response.noContent().entity(workItemDto).build();
     }
 
     // http://127.0.0.1:8080/jaxson/workitems/issue
