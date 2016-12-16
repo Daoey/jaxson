@@ -45,7 +45,7 @@ public final class TeamResourceImpl implements TeamResource {
         }
         Team team = teamService.create(teamDto.getName());
 
-        if (inactiveStatusIsRequested(teamDto)){
+        if (inactiveStatusIsRequested(teamDto)) {
             teamService.inactivateTeam(team.getId());
         }
 
@@ -53,56 +53,28 @@ public final class TeamResourceImpl implements TeamResource {
         return Response.created(location).build();
     }
 
-    private boolean inactiveStatusIsRequested(TeamDto teamDto) {
-        return null != teamDto.isActive() && !teamDto.isActive();
-    }
-
     private boolean usersIn(TeamDto teamDto) {
         return !(null == teamDto.getUsersId() || teamDto.getUsersId().isEmpty());
     }
 
-    @Override
-    public Response updateTeam(TeamDto newValuesTeamDto) { // TODO NullPointer on team
-        Team team = getAsTeam(newValuesTeamDto);
+    private boolean inactiveStatusIsRequested(TeamDto teamDto) {
+        return null != teamDto.isActive() && !teamDto.isActive();
+    }
 
-        if (teamIsInactiveAndNotGettingUpdatedToActive(team, newValuesTeamDto)) {
+    @Override
+    public Response updateTeam(TeamDto newValuesTeamDto) {
+        Team teamDao = getTeamDaoOf(newValuesTeamDto);
+
+        if (teamIsInactiveAndNotGettingUpdatedToActive(teamDao, newValuesTeamDto)) {
             throw new ForbiddenOperationException(String.format(
-                    "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
+                    "Cannot update Team with id '%d'. Team is inactive.", teamDao.getId()));
         }
 
-        update(team, newValuesTeamDto);
+        update(teamDao, newValuesTeamDto);
         return Response.noContent().build();
     }
 
-    private boolean teamIsInactiveAndNotGettingUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
-        return (!team.isActive() & !newValuesTeamDto.isActive());
-    }
-
-    private void update(Team team, TeamDto newValuesTeamDto) {
-        if (activationNeededToUpdate(team)) {
-            teamService.activateTeam(team.getId());
-        }
-        if (nameNeedsToBeSyncedBetween(team, newValuesTeamDto)) {
-            teamService.updateName(team.getId(), newValuesTeamDto.getName());
-        }
-        if (activeStatusDiffersFrom(newValuesTeamDto)) {
-            teamService.inactivateTeam(team.getId());
-        }
-    }
-
-    private boolean activationNeededToUpdate(Team team) {
-        return !team.isActive();
-    }
-
-    private boolean nameNeedsToBeSyncedBetween(Team team, TeamDto newValuesTeamDto) {
-        return newValuesTeamDto.getName() != team.getName();
-    }
-
-    private boolean activeStatusDiffersFrom(TeamDto newValuesTeamDto) {
-        return !newValuesTeamDto.isActive();
-    }
-
-    private Team getAsTeam(TeamDto teamDto) {
+    private Team getTeamDaoOf(TeamDto teamDto) {
         Team team;
         if (weHave(teamDto.getId())) {
             team = teamService.getById(teamDto.getId());
@@ -116,6 +88,38 @@ public final class TeamResourceImpl implements TeamResource {
             return team;
         } else throw new NotFoundException(String.format(
                 "Cannot find Team with id '%d' or name '%s'", teamDto.getId(), teamDto.getName()));
+    }
+
+    private boolean teamIsInactiveAndNotGettingUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
+        return (!team.isActive() & !newValuesTeamDto.isActive());
+    }
+
+    private void update(Team team, TeamDto newValuesTeamDto) {
+        if (activationNeededToMakeUpdatePossibleOn(team)) {
+            makeUpdatable(team);
+        }
+        if (nameUpdateIsRequested(team, newValuesTeamDto)) {
+            teamService.updateName(team.getId(), newValuesTeamDto.getName());
+        }
+        if (inactiveIsTheWantedStatus(newValuesTeamDto)) {
+            teamService.inactivateTeam(team.getId());
+        }
+    }
+
+    private boolean activationNeededToMakeUpdatePossibleOn(Team team) {
+        return !team.isActive();
+    }
+
+    private void makeUpdatable(Team team) {
+        teamService.activateTeam(team.getId());
+    }
+
+    private boolean nameUpdateIsRequested(Team team, TeamDto newValuesTeamDto) {
+        return newValuesTeamDto.getName() != team.getName();
+    }
+
+    private boolean inactiveIsTheWantedStatus(TeamDto newValuesTeamDto) {
+        return !newValuesTeamDto.isActive();
     }
     // TODO method order
 
