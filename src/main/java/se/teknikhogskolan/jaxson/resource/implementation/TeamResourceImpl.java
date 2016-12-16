@@ -55,22 +55,20 @@ public final class TeamResourceImpl implements TeamResource {
     }
 
     @Override
-    public Response updateTeam(TeamDto newValuesTeamDto) {
-
+    public Response updateTeam(TeamDto newValuesTeamDto) { // TODO NullPointer on team
         Team team = getAsTeam(newValuesTeamDto);
 
-        // TODO NullPointer on team
-        if (isActiveOrBeingUpdatedToActive(team, newValuesTeamDto)) {
-            update(team, newValuesTeamDto);
-            return Response.noContent().build();
-        } else {
+        if (teamIsInactiveAndNotUpdatedGettingToActive(team, newValuesTeamDto)) {
             throw new ForbiddenOperationException(String.format(
                     "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
         }
+
+        update(team, newValuesTeamDto);
+        return Response.noContent().build();
     }
 
-    private boolean isActiveOrBeingUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
-        return team.isActive() || newValuesTeamDto.isActive();
+    private boolean teamIsInactiveAndNotUpdatedGettingToActive(Team team, TeamDto newValuesTeamDto) {
+        return (!team.isActive() & !newValuesTeamDto.isActive());
     }
 
     private void update(Team team, TeamDto newValuesTeamDto) {
