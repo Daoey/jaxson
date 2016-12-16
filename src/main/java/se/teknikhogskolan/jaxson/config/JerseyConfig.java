@@ -5,11 +5,7 @@ import javax.ws.rs.ApplicationPath;
 import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
-import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
-import se.teknikhogskolan.jaxson.exception.IllegalArgumentExceptionMapper;
-import se.teknikhogskolan.jaxson.exception.InvalidInputExceptionMapper;
-import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
-import se.teknikhogskolan.jaxson.exception.NoSearchResultExceptionMapper;
+import se.teknikhogskolan.jaxson.exception.*;
 import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.WorkItemResourceImpl;
@@ -27,5 +23,6 @@ public final class JerseyConfig extends ResourceConfig {
         register(NoSearchResultExceptionMapper.class);
         register(IllegalArgumentExceptionMapper.class);
         register(MaximumQuantityExceptionMapper.class);
+        register(RuntimeExceptionMapper.class);
     }
 }
