@@ -14,6 +14,7 @@ import javax.ws.rs.core.Response;
 
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.jaxson.model.WorkItemDto;
 
 @Path("teams")
 @Produces(MediaType.APPLICATION_JSON)
@@ -40,4 +41,8 @@ public interface TeamResource {
     @GET
     @Path("{id}/users")
     Collection<UserDto> getUsersInTeam(@PathParam("id") Long id);
+
+    @GET
+    @Path("{id}/workitems")
+    Collection<WorkItemDto> getWorkItemsInTeam(@PathParam("id") Long id);
 }
