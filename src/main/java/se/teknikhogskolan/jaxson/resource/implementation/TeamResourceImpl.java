@@ -43,11 +43,18 @@ public final class TeamResourceImpl implements TeamResource {
             throw new ForbiddenOperationException(
                     "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}");
         }
-        Team team = teamService.create(teamDto.getName()); // TODO explain active-logic
-        if (null != teamDto.isActive() && !teamDto.isActive()) teamService.inactivateTeam(team.getId());
+        Team team = teamService.create(teamDto.getName());
+
+        if (inactiveStatusIsRequested(teamDto)){
+            teamService.inactivateTeam(team.getId());
+        }
 
         URI location = uriInfo.getAbsolutePathBuilder().path(team.getId().toString()).build();
         return Response.created(location).build();
+    }
+
+    private boolean inactiveStatusIsRequested(TeamDto teamDto) {
+        return null != teamDto.isActive() && !teamDto.isActive();
     }
 
     private boolean usersIn(TeamDto teamDto) {
