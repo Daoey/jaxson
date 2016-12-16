@@ -58,7 +58,7 @@ public final class TeamResourceImpl implements TeamResource {
     public Response updateTeam(TeamDto newValuesTeamDto) { // TODO NullPointer on team
         Team team = getAsTeam(newValuesTeamDto);
 
-        if (teamIsInactiveAndNotUpdatedGettingToActive(team, newValuesTeamDto)) {
+        if (teamIsInactiveAndNotGettingUpdatedToActive(team, newValuesTeamDto)) {
             throw new ForbiddenOperationException(String.format(
                     "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
         }
@@ -67,7 +67,7 @@ public final class TeamResourceImpl implements TeamResource {
         return Response.noContent().build();
     }
 
-    private boolean teamIsInactiveAndNotUpdatedGettingToActive(Team team, TeamDto newValuesTeamDto) {
+    private boolean teamIsInactiveAndNotGettingUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
         return (!team.isActive() & !newValuesTeamDto.isActive());
     }
 
