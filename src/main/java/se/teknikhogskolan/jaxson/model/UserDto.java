@@ -11,7 +11,7 @@ public final class UserDto extends AbstractModel {
     private String username;
     private String firstName;
     private String lastName;
-    private boolean active;
+    private Boolean active;
     private Long teamId;
     private Collection<Long> workItemsId;
 
@@ -66,7 +66,7 @@ public final class UserDto extends AbstractModel {
         return workItemsId;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 

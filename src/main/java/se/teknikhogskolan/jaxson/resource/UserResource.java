@@ -35,18 +35,11 @@ public interface UserResource {
 
     @PUT
     @Path("{userNumber}")
-    Response updateUser(@PathParam("userNumber") Long userNumber,
-                       @QueryParam("active") boolean active, UserDto user);
+    Response updateUser(@PathParam("userNumber") Long userNumber, UserDto user);
 
-    //TODO merge getByCreationDate and GetAll
     @GET
     Response getAll(@BeanParam PageRequestBean pageRequestBean,
                          @BeanParam UserRequestBean userRequestBean);
-
-    @GET
-    @Deprecated
-    @Path("creation")
-    List<UserDto> getByCreationDate(@BeanParam DateRequestBean dateRequestBean);
 
     @GET
     @Path("{userNumber}/workitems")
