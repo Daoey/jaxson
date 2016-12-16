@@ -66,7 +66,7 @@ public final class TeamResourceImpl implements TeamResource {
                     "Cannot update Team with id '%d'. Team is inactive.", team.getId()));
         } else {
             update(team, newValuesTeamDto);
-            return Response.accepted().build();
+            return Response.noContent().build();
         }
     }
 
