@@ -3,7 +3,7 @@ package se.teknikhogskolan.jaxson.model;
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
 
-public class UserRequestBean {
+public final class UserRequestBean {
 
     @QueryParam("username")
     @DefaultValue("")

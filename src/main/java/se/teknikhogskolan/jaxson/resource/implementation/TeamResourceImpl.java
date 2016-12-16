@@ -20,7 +20,7 @@ import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 
-public class TeamResourceImpl implements TeamResource {
+public final class TeamResourceImpl implements TeamResource {
 
     @Autowired
     private TeamService teamService;

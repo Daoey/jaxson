@@ -19,13 +19,13 @@ import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
-public class UserResourceImpl implements UserResource {
+public final class UserResourceImpl implements UserResource {
 
     @Autowired
-    UserService userService;
+    private UserService userService;
 
     @Autowired
-    WorkItemService workItemService;
+    private WorkItemService workItemService;
 
     @Context
     private UriInfo uriInfo;

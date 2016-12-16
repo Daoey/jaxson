@@ -35,7 +35,7 @@ public final class TeamDto extends AbstractModel {
     public TeamDto(){}
 
     public void setActive(Boolean active) {
-        this.active = (null == active)? true : active;
+        this.active = (null == active) ? true : active;
     }
 
     private void setUsersId(Object object) {
