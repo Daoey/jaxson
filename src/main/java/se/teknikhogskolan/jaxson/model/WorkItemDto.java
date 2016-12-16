@@ -1,5 +1,7 @@
 package se.teknikhogskolan.jaxson.model;
 
+import java.time.format.DateTimeFormatter;
+
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 
@@ -29,7 +31,7 @@ public final class WorkItemDto extends AbstractModel {
         status = workItem.getStatus();
 
         if (workItem.getCompletionDate() != null) {
-            completionDate = workItem.getCompletionDate().format(getFormatter());
+            completionDate = workItem.getCompletionDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         }
 
         if (workItem.getUser() != null) {

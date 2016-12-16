@@ -5,8 +5,6 @@ import java.time.format.DateTimeFormatter;
 
 public abstract class AbstractModel {
 
-    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     private Long id;
 
     private String created;
@@ -24,20 +22,18 @@ public abstract class AbstractModel {
     public String getLastModified() {
         return lastModified;
     }
-    
-    public DateTimeFormatter getFormatter() {
-        return formatter;
-    }
 
     void setId(Long id) {
         this.id = id;
     }
 
     public void setCreated(LocalDate created) {
-        this.created = (null == created ? null : created.format(formatter));
+        this.created = (null == created ? null : created.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
     }
 
     public void setLastModified(LocalDate lastModified) {
-        this.lastModified = (null == lastModified ? null : lastModified.format(formatter));
+        this.lastModified = (null == lastModified ? null
+                : lastModified.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
     }
+
 }

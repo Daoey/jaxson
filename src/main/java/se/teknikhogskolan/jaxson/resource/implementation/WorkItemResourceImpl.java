@@ -76,17 +76,11 @@ public final class WorkItemResourceImpl implements WorkItemResource {
 
         workItemService.setStatus(id, workItem.getStatus());
 
-        // TODO decide if this check is needed
-        // if (workItem.getStatus() ==
-        // se.teknikhogskolan.springcasemanagement.model.WorkItem.Status.DONE
-        // && workItem.getId() != null) {
-        // issueService.inactivate(workItem.getIssueId());
-        // }
-
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     // http://127.0.0.1:8080/jaxson/workitems/1
+    // TODO return removed workitem
     @Override
     public Response deleteWorkItem(Long id) {
         workItemService.removeById(id);
@@ -175,6 +169,11 @@ public final class WorkItemResourceImpl implements WorkItemResource {
             throw new IncompleteException("Can not create issue without JSON body containing description");
         }
 
+        // TODO check if assign issue exists
+        if (workItemService.getById(id).getIssue() != null) {
+            throw new IllegalArgumentException("Delete assigned issue before reassigning with new issue");
+        }
+
         Issue issueDao = workItemService.createIssue(issue.getDescription());
         workItemService.addIssueToWorkItem(issueDao.getId(), id);
         URI location = uriInfo.getAbsolutePath();
@@ -206,12 +205,13 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         }
 
         issueService.updateDescription(issue.getId(), issue.getDescription());
-        return Response.ok().build();
+        return Response.noContent().build();
     }
 
     // http://127.0.0.1:8080/jaxson/workitems/{id}/issue
     @Override
     public Response deleteAssignedIssue(Long id) {
+        // TODO return deleted issue
         workItemService.removeIssueFromWorkItem(id);
         return Response.status(Status.NO_CONTENT).build();
     }
