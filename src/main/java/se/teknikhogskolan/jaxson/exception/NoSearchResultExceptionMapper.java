@@ -1,7 +1,8 @@
 package se.teknikhogskolan.jaxson.exception;
 
+import static javax.ws.rs.core.Response.Status.NO_CONTENT;
+
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
@@ -12,6 +13,6 @@ public final class NoSearchResultExceptionMapper implements ExceptionMapper<NoSe
 
     @Override
     public Response toResponse(NoSearchResultException exception) {
-        return Response.status(Status.NOT_FOUND).entity(exception.getMessage()).build();
+        return Response.status(NO_CONTENT).entity(exception.getMessage()).build();
     }
 }
