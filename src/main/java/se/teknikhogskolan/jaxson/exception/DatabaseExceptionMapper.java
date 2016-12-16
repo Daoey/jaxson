@@ -9,7 +9,7 @@ import javax.ws.rs.ext.Provider;
 import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseException;
 
 @Provider
-public class DatabaseExceptionMapper implements ExceptionMapper<DatabaseException> {
+public final class DatabaseExceptionMapper implements ExceptionMapper<DatabaseException> {
 
     @Override
     public Response toResponse(DatabaseException exception) {
