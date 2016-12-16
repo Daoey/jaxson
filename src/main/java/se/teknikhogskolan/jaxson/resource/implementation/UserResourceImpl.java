@@ -16,7 +16,6 @@ import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.UserRequestBean;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.resource.UserResource;
-import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
@@ -58,7 +57,7 @@ public final class UserResourceImpl implements UserResource {
     @Override
     public Response updateUser(Long userNumber, UserDto userDto) {
         User userDao = userService.getByUserNumber(userNumber);
-        if (activatingInactiveUser(userDao, userDto)) {
+        if (updatable(userDao, userDto)) {
             if (getUpdatedUser(userDao, userDto, userNumber) != null) {
                 return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
                         .path(userDto.getUserNumber().toString()).build()).build();
@@ -72,17 +71,16 @@ public final class UserResourceImpl implements UserResource {
         }
     }
 
-    private boolean activatingInactiveUser(User userDao, UserDto userDto) {
+    private boolean updatable(User userDao, UserDto userDto) {
         return userDao.isActive() | userDto.isActive();
     }
 
 
     private User getUpdatedUser(User userDao, UserDto userDto, Long userNumber) {
-        User createdUser = null;
         if (!userDao.isActive()) {
             userService.activate(userNumber);
         }
-        createdUser = updateUserInformation(userDto, createdUser, userNumber);
+        User createdUser = updateUserInformation(userDto, userNumber);
         if (!userDto.isActive()) {
             userService.inactivate(userNumber);
         }
@@ -90,7 +88,8 @@ public final class UserResourceImpl implements UserResource {
     }
 
 
-    private User updateUserInformation(UserDto userDto, User createdUser, Long userNumber) {
+    private User updateUserInformation(UserDto userDto, Long userNumber) {
+        User createdUser = null;
         if (userDto.getUsername() != null) {
             createdUser = userService.updateUsername(userNumber, userDto.getUsername());
         }
