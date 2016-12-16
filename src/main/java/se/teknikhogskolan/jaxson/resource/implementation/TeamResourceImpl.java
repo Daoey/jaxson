@@ -65,7 +65,7 @@ public final class TeamResourceImpl implements TeamResource {
     public Response updateTeam(TeamDto newValuesTeamDto) {
         Team teamDao = getTeamDaoOf(newValuesTeamDto);
 
-        if (teamIsInactiveAndNotGettingUpdatedToActive(teamDao, newValuesTeamDto)) {
+        if (inactiveAndNotUpdatedToActive(teamDao, newValuesTeamDto)) {
             throw new ForbiddenOperationException(String.format(
                     "Cannot update Team with id '%d'. Team is inactive.", teamDao.getId()));
         }
@@ -90,7 +90,7 @@ public final class TeamResourceImpl implements TeamResource {
                 "Cannot find Team with id '%d' or name '%s'", teamDto.getId(), teamDto.getName()));
     }
 
-    private boolean teamIsInactiveAndNotGettingUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
+    private boolean inactiveAndNotUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
         return (!team.isActive() & !newValuesTeamDto.isActive());
     }
 
@@ -121,7 +121,6 @@ public final class TeamResourceImpl implements TeamResource {
     private boolean inactiveIsTheWantedStatus(TeamDto newValuesTeamDto) {
         return !newValuesTeamDto.isActive();
     }
-    // TODO method order
 
     private boolean weHave(Object object) {
         if (null == object) return false;
