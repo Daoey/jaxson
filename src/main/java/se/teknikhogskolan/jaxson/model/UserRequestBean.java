@@ -9,7 +9,7 @@ public final class UserRequestBean {
     @DefaultValue("")
     private String username;
 
-    @QueryParam("firstname")
+    @QueryParam("firstName")
     @DefaultValue("")
     private String firstName;
 
