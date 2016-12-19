@@ -9,11 +9,11 @@ public final class UserRequestBean {
     @DefaultValue("")
     private String username;
 
-    @QueryParam("firstName")
+    @QueryParam("first-name")
     @DefaultValue("")
     private String firstName;
 
-    @QueryParam("lastName")
+    @QueryParam("last-name")
     @DefaultValue("")
     private String lastName;
 
