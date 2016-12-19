@@ -44,7 +44,7 @@ public final class UserResourceImpl implements UserResource {
                     .path(userDao.getUserNumber().toString()).build()).build();
         }
         throw new IllegalArgumentException("Can not create User without JSON body containing"
-                + " userNumber, username, firstname and lastname");
+                + " userNumber, username, first name and last name");
     }
 
     private boolean noNullParameters(UserDto user) {
@@ -71,7 +71,7 @@ public final class UserResourceImpl implements UserResource {
                         .path(userNumber.toString()).build()).build();
             } else {
                 throw new IncompleteException("Could not find any username,"
-                        + " firstname or lastname in the JSON body of the request.");
+                        + " first name or last name in the JSON body of the request.");
             }
         } else {
             throw new ForbiddenOperationException(String.format(
@@ -122,7 +122,7 @@ public final class UserResourceImpl implements UserResource {
             userService.getAllByPage(userRequestBean.getPage(),
                     userRequestBean.getSize()).forEach(user -> userDtos.add(new UserDto(user)));
         } else {
-            userService.search(userRequestBean.getFirtname(), userRequestBean.getLastname(),
+            userService.search(userRequestBean.getFirstName(), userRequestBean.getLastName(),
                     userRequestBean.getUsername()).forEach(user -> userDtos.add(new UserDto(user)));
         }
         return userDtos;
@@ -131,8 +131,8 @@ public final class UserResourceImpl implements UserResource {
     private boolean onlyDefaultNameValues(UserRequestBean userRequestBean) {
         String defaultValue = "";
         return defaultValue.equals(userRequestBean.getUsername())
-                && defaultValue.equals(userRequestBean.getFirtname())
-                && defaultValue.equals(userRequestBean.getLastname());
+                && defaultValue.equals(userRequestBean.getFirstName())
+                && defaultValue.equals(userRequestBean.getLastName());
     }
 
     @Override

@@ -11,11 +11,11 @@ public final class UserRequestBean {
 
     @QueryParam("firstname")
     @DefaultValue("")
-    private String firtname;
+    private String firstName;
 
-    @QueryParam("lastname")
+    @QueryParam("lastName")
     @DefaultValue("")
-    private String lastname;
+    private String lastName;
 
     @QueryParam("page")
     private int page;
@@ -36,11 +36,11 @@ public final class UserRequestBean {
         return username;
     }
 
-    public String getFirtname() {
-        return firtname;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public String getLastname() {
-        return lastname;
+    public String getLastName() {
+        return lastName;
     }
 }
