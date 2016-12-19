@@ -18,11 +18,12 @@ public final class JerseyConfig extends ResourceConfig {
         register(TeamResourceImpl.class);
         register(UserResourceImpl.class);
         register(WorkItemResourceImpl.class);
+
         register(DatabaseExceptionMapper.class);
         register(InvalidInputExceptionMapper.class);
         register(NoSearchResultExceptionMapper.class);
-        register(IllegalArgumentExceptionMapper.class);
         register(MaximumQuantityExceptionMapper.class);
+        register(IllegalArgumentExceptionMapper.class);
         register(RuntimeExceptionMapper.class);
     }
 }
