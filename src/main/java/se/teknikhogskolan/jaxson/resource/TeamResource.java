@@ -32,7 +32,8 @@ public interface TeamResource {
     TeamDto getTeam(@PathParam("id") Long id);
 
     @PUT
-    Response updateTeam(TeamDto teamDto);
+    @Path("{id}")
+    Response updateTeam(@PathParam("id") Long id, TeamDto teamDto);
 
     @PUT
     @Path("{id}/users")

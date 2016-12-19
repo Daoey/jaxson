@@ -62,36 +62,52 @@ public final class TeamResourceImpl implements TeamResource {
     }
 
     @Override
-    public Response updateTeam(TeamDto newValuesTeamDto) {
-        Team teamDao = getTeamDaoOf(newValuesTeamDto);
+    public Response updateTeam(Long id, TeamDto newValuesTeamDto) {
 
-        if (inactiveAndNotUpdatedToActive(teamDao, newValuesTeamDto)) {
-            throw new ForbiddenOperationException(String.format(
-                    "Cannot update Team with id '%d'. Team is inactive.", teamDao.getId()));
-        }
+        stopAttemptsToUpdateTeamId(id, newValuesTeamDto);
+
+        Team teamDao = getTeamDaoById(id);
+
+        stopAttemptsToUpdateInactiveTeam(teamDao, newValuesTeamDto);
 
         update(teamDao, newValuesTeamDto);
+
         return Response.noContent().build();
     }
 
-    private Team getTeamDaoOf(TeamDto teamDto) {
-        Team team;
-        if (weHave(teamDto.getId())) {
-            team = teamService.getById(teamDto.getId());
-        } else if (weHave(teamDto.getName())) {
-            team = teamService.getByName(teamDto.getName());
-        } else throw new IncompleteException(String.format(
-                "Team id or Team name needed to locate Team. Id was '%d' and name was '%s'",
-                teamDto.getId(), teamDto.getName()));
+    private void stopAttemptsToUpdateTeamId(Long id, TeamDto newValuesTeamDto) {
+        if (idInTeamDtoDoNotMatchPathParamId(id, newValuesTeamDto)) {
+            throw new ForbiddenOperationException(String.format(
+                    "Not allowed to update id on Team. Team id was '%d', id in request body was '%d'",
+                    id, newValuesTeamDto.getId()));
+        }
+    }
 
+    private boolean idInTeamDtoDoNotMatchPathParamId(Long id, TeamDto newValuesTeamDto) {
+        return null != newValuesTeamDto.getId() & !id.equals(newValuesTeamDto.getId());
+    }
+
+    private void stopAttemptsToUpdateInactiveTeam(Team teamDao, TeamDto newValuesTeamDto) {
+        if (inactiveAndNotUpdatedToActive(teamDao, newValuesTeamDto)) {
+            throw new ForbiddenOperationException(String.format(
+                    "Not allowed to update inactive Team. Team with id '%d' is inactive", teamDao.getId()));
+        }
+    }
+
+    private Team getTeamDaoById(Long id) {
+        Team team = teamService.getById(id);
         if (weHave(team)) {
             return team;
-        } else throw new NotFoundException(String.format(
-                "Cannot find Team with id '%d' or name '%s'", teamDto.getId(), teamDto.getName()));
+        } else throw new NotFoundException(String.format("Cannot find Team with id '%d'", id));
     }
 
     private boolean inactiveAndNotUpdatedToActive(Team team, TeamDto newValuesTeamDto) {
-        return (!team.isActive() & !newValuesTeamDto.isActive());
+        if (!team.isActive()) {
+            if (null == newValuesTeamDto.isActive() || !newValuesTeamDto.isActive()) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void update(Team team, TeamDto newValuesTeamDto) {
@@ -119,7 +135,7 @@ public final class TeamResourceImpl implements TeamResource {
     }
 
     private boolean inactiveIsTheWantedStatus(TeamDto newValuesTeamDto) {
-        return !newValuesTeamDto.isActive();
+        return (null == newValuesTeamDto.isActive()) ? false : !newValuesTeamDto.isActive();
     }
 
     private boolean weHave(Object object) {
