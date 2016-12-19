@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.exception.ForbiddenOperationException;
 import se.teknikhogskolan.jaxson.exception.IncompleteException;
-import se.teknikhogskolan.jaxson.model.PageRequestBean;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.UserRequestBean;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
@@ -39,8 +38,8 @@ public final class UserResourceImpl implements UserResource {
             return Response.created(uriInfo.getAbsolutePathBuilder()
                     .path(userDao.getUserNumber().toString()).build()).build();
         }
-        throw new IllegalArgumentException("Can not create User item without JSON body containing"
-                + " UserNumber, username, firstname and lastname");
+        throw new IllegalArgumentException("Can not create User without JSON body containing"
+                + " userNumber, username, firstname and lastname");
     }
 
     private boolean noNullParameters(UserDto user) {
@@ -49,16 +48,16 @@ public final class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public Response getUserByUserNumber(Long userNumber) {
+    public UserDto getUserByUserNumber(Long userNumber) {
         UserDto userDto = new UserDto(userService.getByUserNumber(userNumber));
-        return Response.ok(userDto).build();
+        return userDto;
     }
 
     @Override
     public Response updateUser(Long userNumber, UserDto userDto) {
         User userDao = userService.getByUserNumber(userNumber);
         if (updatable(userDao, userDto)) {
-            if (getUpdatedUser(userDao, userDto, userNumber) != null) {
+            if (activeOrShouldBe(userDao, userDto, userNumber) != null) {
                 return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
                         .path(userDto.getUserNumber().toString()).build()).build();
             } else {
@@ -76,7 +75,7 @@ public final class UserResourceImpl implements UserResource {
     }
 
 
-    private User getUpdatedUser(User userDao, UserDto userDto, Long userNumber) {
+    private User activeOrShouldBe(User userDao, UserDto userDto, Long userNumber) {
         if (!userDao.isActive()) {
             userService.activate(userNumber);
         }
@@ -103,20 +102,19 @@ public final class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public Response getAll(@BeanParam PageRequestBean pageRequestBean,
-                           @BeanParam UserRequestBean userRequestBean) {
+    public List<UserDto> getAll(@BeanParam UserRequestBean userRequestBean) {
         List<UserDto> userDtos = new ArrayList<>();
-        if (onlyDefaultValues(userRequestBean)) {
-            userService.getAllByPage(pageRequestBean.getPage(),
-                    pageRequestBean.getSize()).forEach(user -> userDtos.add(new UserDto(user)));
+        if (onlyDefaultNameValues(userRequestBean)) {
+            userService.getAllByPage(userRequestBean.getPage(),
+                    userRequestBean.getSize()).forEach(user -> userDtos.add(new UserDto(user)));
         } else {
             userService.search(userRequestBean.getFirtname(), userRequestBean.getLastname(),
                     userRequestBean.getUsername()).forEach(user -> userDtos.add(new UserDto(user)));
         }
-        return Response.ok(userDtos).build();
+        return userDtos;
     }
 
-    private boolean onlyDefaultValues(UserRequestBean userRequestBean) {
+    private boolean onlyDefaultNameValues(UserRequestBean userRequestBean) {
         String defaultValue = "";
         return defaultValue.equals(userRequestBean.getUsername())
                 && defaultValue.equals(userRequestBean.getFirtname())
@@ -124,19 +122,23 @@ public final class UserResourceImpl implements UserResource {
     }
 
     @Override
-    public Response getAllWorkItemsFromUser(Long userNumber) {
+    public List<WorkItemDto> getAllWorkItemsFromUser(Long userNumber) {
         List<WorkItemDto> workItemDtos = new ArrayList<>();
         workItemService.getByUsernumber(userNumber).forEach(workItem -> workItemDtos.add(new WorkItemDto(workItem)));
-        return Response.ok(workItemDtos).build();
+        return workItemDtos;
     }
 
     @Override
     public Response assignWorkItemToUser(Long userNumber, WorkItemDto workItemDto) {
-        if (workItemDto.getId() != null) {
+        if (workItemExist(workItemDto)) {
             workItemService.setUser(userNumber, workItemDto.getId());
-            return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
+            return Response.ok().location(uriInfo.getAbsolutePathBuilder()
                     .path(userNumber.toString()).build()).build();
         }
         throw new IllegalArgumentException("Could not find any WorkItem id in Json Body of the request.");
+    }
+
+    private boolean workItemExist(WorkItemDto workItemDto) {
+        return workItemDto.getId() != null && workItemService.getById(workItemDto.getId()) != null;
     }
 }

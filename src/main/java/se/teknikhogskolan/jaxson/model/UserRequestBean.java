@@ -17,6 +17,21 @@ public final class UserRequestBean {
     @DefaultValue("")
     private String lastname;
 
+    @QueryParam("page")
+    private int page;
+
+    @QueryParam("size")
+    @DefaultValue("10")
+    private int size;
+
+    public int getPage() {
+        return page;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
     public String getUsername() {
         return username;
     }
