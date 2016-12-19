@@ -179,7 +179,7 @@ public final class TeamResourceImpl implements TeamResource {
             teamService.addUserToTeam(teamId, user.getId());
             return Response.noContent().build();
 
-        } else throw new IncompleteException(String.format("No user id or user number found in request."));
+        } else throw new IncompleteException(String.format("No User id or User number found in request."));
     }
 
     @Override
