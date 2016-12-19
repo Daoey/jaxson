@@ -54,9 +54,5 @@ public interface WorkItemResource {
     @PUT
     @Path("{id}/issue")
     Response updateAssignedIssue(@PathParam("id") Long id, IssueDto issue);
-    
-    @GET
-    @Path("/issue")
-    Response getAllWorkItemsWithIssue();
 
 }

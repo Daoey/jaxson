@@ -11,7 +11,7 @@ import se.teknikhogskolan.springcasemanagement.service.exception.InvalidInputExc
 public final class WorkItemsRequestBean {
 
     public enum RequestType {
-        DEFAULT, CONFLICTING, INCOMPLETE, DESCRIPTION, STATUS, CREATED, COMPLETED
+        DEFAULT, CONFLICTING, INCOMPLETE, DESCRIPTION, STATUS, CREATED, COMPLETED, HAS_ISSUE
     }
 
     private @QueryParam("page") @DefaultValue("0") int page;
@@ -22,6 +22,7 @@ public final class WorkItemsRequestBean {
     private @QueryParam("createdBefore") String createdBefore;
     private @QueryParam("completedAfter") String completedAfter;
     private @QueryParam("completedBefore") String completedBefore;
+    private @QueryParam("hasIssue") Boolean hasIssue;
 
     public int getPage() {
         return page;
@@ -85,6 +86,15 @@ public final class WorkItemsRequestBean {
                 return RequestType.CONFLICTING;
             }
             requestType = RequestType.STATUS;
+        }
+
+        if (hasIssue != null && Boolean.TRUE.equals(hasIssue)) {
+
+            if (requestType != RequestType.DEFAULT) {
+                return RequestType.CONFLICTING;
+            }
+
+            requestType = RequestType.HAS_ISSUE;
         }
 
         if (createdAfter != null || createdBefore != null) {
