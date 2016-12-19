@@ -16,8 +16,11 @@ import se.teknikhogskolan.jaxson.model.UserRequestBean;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
+import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
+import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseException;
+import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
 
 public final class UserResourceImpl implements UserResource {
 
@@ -55,23 +58,33 @@ public final class UserResourceImpl implements UserResource {
 
     @Override
     public Response updateUser(Long userNumber, UserDto userDto) {
-        User userDao = userService.getByUserNumber(userNumber);
+        User userDao;
+        try {
+            userDao = userService.getByUserNumber(userNumber);
+        } catch (NoSearchResultException e) {
+            throw new IllegalArgumentException("Could not find user with userNumber: " + userNumber);
+        }
         if (updatable(userDao, userDto)) {
             if (activeOrShouldBe(userDao, userDto, userNumber) != null) {
                 return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
-                        .path(userDto.getUserNumber().toString()).build()).build();
+                        .path(userNumber.toString()).build()).build();
             } else {
                 throw new IncompleteException("Could not find any username,"
                         + " firstname or lastname in the JSON body of the request.");
             }
         } else {
             throw new ForbiddenOperationException(String.format(
-                    "Cannot update User with id '%d'. Team is inactive.", userDto.getId()));
+                    "Cannot update User with id '%d'. User is inactive, missing \"active\":\"true\" "
+                            + "parameter in JSON body.", userDao.getId()));
         }
     }
 
     private boolean updatable(User userDao, UserDto userDto) {
-        return userDao.isActive() | userDto.isActive();
+        if (userDto.isActive() == null) {
+            return userDao.isActive();
+        } else {
+            return userDto.isActive() || userDao.isActive();
+        }
     }
 
 
@@ -80,7 +93,7 @@ public final class UserResourceImpl implements UserResource {
             userService.activate(userNumber);
         }
         User createdUser = updateUserInformation(userDto, userNumber);
-        if (!userDto.isActive()) {
+        if (userDto.isActive() != null && !userDto.isActive()) {
             userService.inactivate(userNumber);
         }
         return createdUser;
@@ -130,15 +143,31 @@ public final class UserResourceImpl implements UserResource {
 
     @Override
     public Response assignWorkItemToUser(Long userNumber, WorkItemDto workItemDto) {
-        if (workItemExist(workItemDto)) {
-            workItemService.setUser(userNumber, workItemDto.getId());
-            return Response.ok().location(uriInfo.getAbsolutePathBuilder()
-                    .path(userNumber.toString()).build()).build();
+        if (workItemDto.getId() != null) {
+            if (userExist(userNumber) && workItemExist(workItemDto.getId())) {
+                workItemService.setUser(userNumber, workItemDto.getId());
+                return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
+                        .path(userNumber.toString()).build()).build();
+            }
         }
         throw new IllegalArgumentException("Could not find any WorkItem id in Json Body of the request.");
     }
 
-    private boolean workItemExist(WorkItemDto workItemDto) {
-        return workItemDto.getId() != null && workItemService.getById(workItemDto.getId()) != null;
+    private boolean userExist(Long userNumber) {
+        try {
+            userService.getByUserNumber(userNumber);
+            return true;
+        } catch (NoSearchResultException e) {
+            throw new IllegalArgumentException("Could not find user with userNumber: " + userNumber);
+        }
+    }
+
+    private boolean workItemExist(Long workItemId) {
+        try {
+            workItemService.getById(workItemId);
+            return true;
+        } catch (NoSearchResultException e) {
+            throw new IllegalArgumentException("Could not find work item with id: " + workItemId);
+        }
     }
 }
