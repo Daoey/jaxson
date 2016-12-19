@@ -16,22 +16,24 @@ import se.teknikhogskolan.jaxson.model.UserRequestBean;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
-import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
-import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseException;
 import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
 
 public final class UserResourceImpl implements UserResource {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    private WorkItemService workItemService;
+    private final WorkItemService workItemService;
 
     @Context
     private UriInfo uriInfo;
+
+    @Autowired
+    public UserResourceImpl(WorkItemService workItemService, UserService userService) {
+        this.workItemService = workItemService;
+        this.userService = userService;
+    }
 
     @Override
     public Response createUser(UserDto userDto) {
@@ -52,8 +54,7 @@ public final class UserResourceImpl implements UserResource {
 
     @Override
     public UserDto getUserByUserNumber(Long userNumber) {
-        UserDto userDto = new UserDto(userService.getByUserNumber(userNumber));
-        return userDto;
+        return new UserDto(userService.getByUserNumber(userNumber));
     }
 
     @Override
