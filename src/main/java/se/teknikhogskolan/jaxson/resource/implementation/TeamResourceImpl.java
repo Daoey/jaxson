@@ -138,6 +138,7 @@ public final class TeamResourceImpl implements TeamResource {
         return (null == newValuesTeamDto.isActive()) ? false : !newValuesTeamDto.isActive();
     }
 
+    //TODO is null or empty
     private boolean weHave(Object object) {
         if (null == object) return false;
         if (object instanceof Collection) {

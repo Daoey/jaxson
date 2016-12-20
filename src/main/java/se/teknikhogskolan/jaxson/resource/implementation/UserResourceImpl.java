@@ -37,6 +37,7 @@ public final class UserResourceImpl implements UserResource {
 
     @Override
     public Response createUser(UserDto userDto) {
+        //TODO change to service user
         if (noNullParameters(userDto)) {
             User userDao = userService.create(userDto.getUserNumber(),
                     userDto.getUsername(), userDto.getFirstName(), userDto.getLastName());
