@@ -66,11 +66,11 @@ public final class TeamResourceImpl implements TeamResource {
 
         stopAttemptsToUpdateTeamId(id, newValuesTeamDto);
 
-        Team teamDao = getTeamDaoById(id);
+        Team teamModel = getTeamModelById(id);
 
-        stopAttemptsToUpdateInactiveTeam(teamDao, newValuesTeamDto);
+        stopAttemptsToUpdateInactiveTeam(teamModel, newValuesTeamDto);
 
-        update(teamDao, newValuesTeamDto);
+        update(teamModel, newValuesTeamDto);
 
         return Response.noContent().build();
     }
@@ -87,14 +87,14 @@ public final class TeamResourceImpl implements TeamResource {
         return null != newValuesTeamDto.getId() & !id.equals(newValuesTeamDto.getId());
     }
 
-    private void stopAttemptsToUpdateInactiveTeam(Team teamDao, TeamDto newValuesTeamDto) {
-        if (inactiveAndNotUpdatedToActive(teamDao, newValuesTeamDto)) {
+    private void stopAttemptsToUpdateInactiveTeam(Team teamModel, TeamDto newValuesTeamDto) {
+        if (inactiveAndNotUpdatedToActive(teamModel, newValuesTeamDto)) {
             throw new ForbiddenOperationException(String.format(
-                    "Not allowed to update inactive Team. Team with id '%d' is inactive", teamDao.getId()));
+                    "Not allowed to update inactive Team. Team with id '%d' is inactive", teamModel.getId()));
         }
     }
 
-    private Team getTeamDaoById(Long id) {
+    private Team getTeamModelById(Long id) {
         Team team = teamService.getById(id);
         if (notNullOrEmpty(team)) {
             return team;
