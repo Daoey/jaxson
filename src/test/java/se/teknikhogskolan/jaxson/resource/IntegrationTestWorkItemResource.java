@@ -24,7 +24,7 @@ import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureCon
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JaxsonApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = { HsqlInfrastructureConfig.class })
-public class TestWorkItemResource {
+public class IntegrationTestWorkItemResource {
 
     private static Client client;
 
