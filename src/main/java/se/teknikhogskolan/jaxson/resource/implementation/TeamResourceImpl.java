@@ -96,7 +96,7 @@ public final class TeamResourceImpl implements TeamResource {
 
     private Team getTeamDaoById(Long id) {
         Team team = teamService.getById(id);
-        if (weHave(team)) {
+        if (notNullOrEmpty(team)) {
             return team;
         } else throw new NotFoundException(String.format("Cannot find Team with id '%d'", id));
     }
@@ -138,8 +138,7 @@ public final class TeamResourceImpl implements TeamResource {
         return (null == newValuesTeamDto.isActive()) ? false : !newValuesTeamDto.isActive();
     }
 
-    //TODO is null or empty
-    private boolean weHave(Object object) {
+    private boolean notNullOrEmpty(Object object) {
         if (null == object) return false;
         if (object instanceof Collection) {
             Collection collection = (Collection) object;
@@ -169,12 +168,12 @@ public final class TeamResourceImpl implements TeamResource {
         Long userId = userDto.getId();
         Long userNumber = userDto.getUserNumber();
 
-        if (weHave(userId) && weHave(teamId)) {
+        if (notNullOrEmpty(userId) && notNullOrEmpty(teamId)) {
 
             teamService.addUserToTeam(teamId, userId);
             return Response.noContent().build();
 
-        } else if (weHave(userNumber) && weHave(teamId)) {
+        } else if (notNullOrEmpty(userNumber) && notNullOrEmpty(teamId)) {
 
             User user = userService.getByUserNumber(userNumber);
             teamService.addUserToTeam(teamId, user.getId());
