@@ -38,15 +38,11 @@ public class IntegrationTestWorkItemResource {
 
     @Test
     public void addAWorkItemAndGetItFromInMemoryDatabase() {
-        
-        System.out.println("Port: " + randomPort);
-
-        client.target("http://localhost:" + randomPort + "/jaxson/").path("workitems").request()
-                .post(Entity.entity(new WorkItemDto("some description"), MediaType.APPLICATION_JSON));
-
-        Response response = client.target("http://localhost:" + randomPort + "/jaxson/").path("workitems/1").request()
-                .get();
-                
+        String baseUrl = "http://localhost:" + randomPort + "/jaxson/";
+        String resource = "workitems";
+        client.target(baseUrl).path(resource).request().header("Authorization", "Basic cm9vdDpzZWNyZXQ=").post(Entity.entity(
+                new WorkItemDto("some description"), MediaType.APPLICATION_JSON));
+        Response response = client.target(baseUrl).path(resource + "/1").request().header("Authorization", "Basic cm9vdDpzZWNyZXQ=").get();
         assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
     }
 }
