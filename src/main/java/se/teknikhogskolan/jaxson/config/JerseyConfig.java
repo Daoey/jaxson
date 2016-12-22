@@ -20,7 +20,7 @@ public final class JerseyConfig extends ResourceConfig {
         register(UserResourceImpl.class);
         register(WorkItemResourceImpl.class);
 
-        register(AuthorizationRequestFilter.class);
+//        register(AuthorizationRequestFilter.class);
 
         register(DatabaseExceptionMapper.class);
         register(InvalidInputExceptionMapper.class);

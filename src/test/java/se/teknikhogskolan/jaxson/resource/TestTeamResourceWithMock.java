@@ -44,7 +44,7 @@ import static org.springframework.http.HttpStatus.OK;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class UnitTestTeamResource {
+public class TestTeamResourceWithMock {
 
     @MockBean
     TeamService teamService;

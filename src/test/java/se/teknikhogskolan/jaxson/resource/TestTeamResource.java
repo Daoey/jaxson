@@ -32,8 +32,10 @@ import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureCon
 @ContextConfiguration(classes = { HsqlInfrastructureConfig.class })
 public class TestTeamResource {
 
-    private static Client client;
     @LocalServerPort private int randomPort;
+    private static final String auth = "Authorization";
+    private static final String authCode = "Basic cm9vdDpzZWNyZXQ=";
+    private static Client client;
     private WebTarget teamWebTarget;
     private TeamViewBean teamViewBean;
     private URI teamInDbLocation;
@@ -49,13 +51,13 @@ public class TestTeamResource {
         String resource = "teams";
         teamWebTarget = client.target(targetUrl).path(resource);
         teamViewBean = new TeamViewBean("Testing Team");
-        teamInDbLocation = teamWebTarget.request().post(Entity.entity(teamViewBean, MediaType.APPLICATION_JSON))
-                .getLocation();
+        teamInDbLocation = teamWebTarget.request().header(auth, authCode)
+                .post(Entity.entity(teamViewBean, MediaType.APPLICATION_JSON)).getLocation();
     }
 
     @Test
     public void createTeam() {
-        Response response = teamWebTarget.request()
+        Response response = teamWebTarget.request().header(auth, authCode)
                 .post(Entity.entity(new TeamViewBean("Created Team"), MediaType.APPLICATION_JSON));
         assertEquals(CREATED, response.getStatusInfo());
         assertNotNull(response.getLocation());
@@ -63,7 +65,7 @@ public class TestTeamResource {
 
     @Test
     public void canGetTeamById() {
-        Response response = client.target(teamInDbLocation).request().get();
+        Response response = client.target(teamInDbLocation).request().header(auth, authCode).get();
         assertEquals(OK, response.getStatusInfo());
         TeamViewBean result = response.readEntity(TeamViewBean.class);
         assertEquals(teamViewBean.getName(), result.getName());
