@@ -18,7 +18,7 @@ import se.teknikhogskolan.jaxson.resource.UserResource;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
-import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
+import se.teknikhogskolan.springcasemanagement.service.exception.NotFoundException;
 
 public final class UserResourceImpl implements UserResource {
 
@@ -60,12 +60,7 @@ public final class UserResourceImpl implements UserResource {
 
     @Override
     public Response updateUser(Long userNumber, UserDto userDto) {
-        User userDao;
-        try {
-            userDao = userService.getByUserNumber(userNumber);
-        } catch (NoSearchResultException e) {
-            throw new IllegalArgumentException("Could not find user with userNumber: " + userNumber);
-        }
+        User userDao = userService.getByUserNumber(userNumber);
         if (updatable(userDao, userDto)) {
             if (activeOrShouldBe(userDao, userDto, userNumber) != null) {
                 return Response.noContent().location(uriInfo.getAbsolutePathBuilder()
@@ -156,20 +151,18 @@ public final class UserResourceImpl implements UserResource {
     }
 
     private boolean userExist(Long userNumber) {
+        // TODO remove try catch and let NotFoundException return as 404?
         try {
             userService.getByUserNumber(userNumber);
             return true;
-        } catch (NoSearchResultException e) {
+        } catch (NotFoundException e) {
             throw new IllegalArgumentException("Could not find user with userNumber: " + userNumber);
         }
     }
 
+    // TODO handle non-existing id coming by json in same way as id coming as pathparam? (NotFound/404?)
     private boolean workItemExist(Long workItemId) {
-        try {
-            workItemService.getById(workItemId);
-            return true;
-        } catch (NoSearchResultException e) {
-            throw new IllegalArgumentException("Could not find work item with id: " + workItemId);
-        }
+        if (workItemService.exists(workItemId)) return true;
+        else throw new IllegalArgumentException("Cannot find WorkItem with id: " + workItemId);
     }
 }

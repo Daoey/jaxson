@@ -6,13 +6,13 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.ext.ExceptionMapper;
 import javax.ws.rs.ext.Provider;
 
-import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
+import se.teknikhogskolan.springcasemanagement.service.exception.NotFoundException;
 
 @Provider
-public final class NoSearchResultExceptionMapper implements ExceptionMapper<NoSearchResultException> {
+public final class NotFoundExceptionMapper implements ExceptionMapper<NotFoundException> {
 
     @Override
-    public Response toResponse(NoSearchResultException exception) {
+    public Response toResponse(NotFoundException exception) {
         return Response.status(NOT_FOUND).entity(exception.getMessage()).build();
     }
 }

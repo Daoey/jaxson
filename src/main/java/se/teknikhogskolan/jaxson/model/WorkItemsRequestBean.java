@@ -2,11 +2,8 @@ package se.teknikhogskolan.jaxson.model;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
-
 import javax.ws.rs.DefaultValue;
 import javax.ws.rs.QueryParam;
-
-import se.teknikhogskolan.springcasemanagement.service.exception.InvalidInputException;
 
 public final class WorkItemsRequestBean {
 
@@ -44,7 +41,8 @@ public final class WorkItemsRequestBean {
         try {
             return LocalDate.parse(createdAfter);
         } catch (DateTimeParseException exception) {
-            throw new InvalidInputException(createdAfter + " is not a valid date. Please enter in form: 2007-12-03");
+            throw new IllegalArgumentException(createdAfter
+                    + " is not a valid date. Please enter in form: 2007-12-28");
         }
     }
 
@@ -52,7 +50,8 @@ public final class WorkItemsRequestBean {
         try {
             return LocalDate.parse(createdBefore);
         } catch (DateTimeParseException exception) {
-            throw new InvalidInputException(createdBefore + " is not a valid date. Please enter in form: 2007-12-03");
+            throw new IllegalArgumentException(createdBefore
+                    + " is not a valid date. Please enter in form: 2007-12-28");
         }
     }
 
@@ -60,7 +59,8 @@ public final class WorkItemsRequestBean {
         try {
             return LocalDate.parse(completedAfter);
         } catch (DateTimeParseException exception) {
-            throw new InvalidInputException(completedAfter + " is not a valid date. Please enter in form: 2007-12-03");
+            throw new IllegalArgumentException(completedAfter
+                    + " is not a valid date. Please enter in form: 2007-12-28");
         }
     }
 
@@ -68,7 +68,8 @@ public final class WorkItemsRequestBean {
         try {
             return LocalDate.parse(completedBefore);
         } catch (DateTimeParseException exception) {
-            throw new InvalidInputException(completedBefore + " is not a valid date. Please enter in form: 2007-12-03");
+            throw new IllegalArgumentException(completedBefore
+                    + " is not a valid date. Please enter in form: 2007-12-28");
         }
     }
 

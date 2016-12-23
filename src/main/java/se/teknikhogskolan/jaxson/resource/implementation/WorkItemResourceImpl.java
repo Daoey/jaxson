@@ -24,7 +24,7 @@ import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 import se.teknikhogskolan.springcasemanagement.service.IssueService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
-import se.teknikhogskolan.springcasemanagement.service.exception.NoSearchResultException;
+import se.teknikhogskolan.springcasemanagement.service.exception.NotFoundException;
 import se.teknikhogskolan.springcasemanagement.service.wrapper.Piece;
 
 public final class WorkItemResourceImpl implements WorkItemResource {
@@ -123,7 +123,8 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     // http://127.0.0.1:8080/jaxson/workitems
     // http://127.0.0.1:8080/jaxson/workitems?page=1&size=1
     private Response getWorkItemsByPage(int page, int size) {
-        Piece<WorkItem> piece = workItemService.getAllByPage(page, size);
+        // TODO change all paging to pieces or to pages?
+        Piece<WorkItem> piece = workItemService.getAllByPiece(page, size);
         List<WorkItem> workItemDaos = piece.getContent();
         return convertCollectionToResponse(workItemDaos);
     }
@@ -200,7 +201,7 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         WorkItem workItem = workItemService.getById(id);
 
         if (workItem.getIssue() == null) {
-            throw new NoSearchResultException("No issue assigned to workItem with id " + id);
+            throw new NotFoundException("No issue assigned to workItem with id " + id);
         }
 
         IssueDto issueDto = new IssueDto(workItem.getIssue());
@@ -227,5 +228,4 @@ public final class WorkItemResourceImpl implements WorkItemResource {
         workItemService.removeIssueFromWorkItem(id);
         return Response.noContent().build();
     }
-
 }
