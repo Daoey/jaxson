@@ -1,8 +1,10 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,7 +24,10 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 
 @RunWith(SpringRunner.class)
@@ -32,6 +37,9 @@ public class TestTeamResourceWithMock {
     @MockBean
     private TeamService teamService;
 
+    @Mock
+    Team mockedTeam;
+
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
 
@@ -39,24 +47,48 @@ public class TestTeamResourceWithMock {
     private int randomPort;
 
     private static String baseUrl;
+    private RestTemplate restTemplate;
     private final String auth = "Authorization";
     private final String authCode = "Basic cm9vdDpzZWNyZXQ=";
+    private final String teamResource = "/teams/";
+    private final String teamName = "The mockers";
+    private final Team team = new Team(teamName);
     private final Long teamId = 1001L;
-    private final String teamName = "Mocking Team";
 
     @Before
     public void setup() {
         baseUrl = "http://localhost:" + randomPort + "/jaxson";
+        restTemplate = restTemplateBuilder.build();
     }
 
     @Test
-    public void testMockingWithAuth() throws URISyntaxException {
-        Team team = new Team(teamName);
-        given(this.teamService.getById(teamId)).willReturn(team);
+    public void createTeam() throws URISyntaxException {
+        given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
+        when(mockedTeam.getId()).thenReturn(teamId);
 
-        RestTemplate restTemplate = restTemplateBuilder.build();
-        ResponseEntity<TeamDto> response = restTemplate.exchange(createUri("/teams/1001"), HttpMethod.GET, getHttpEntity(), TeamDto.class);
+        JSONObject request = new JSONObject();
+        request.put("name", mockedTeam.getName());
+        request.put("active", true);
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.set(auth, authCode);
+        headers.set("Content-Type", MediaType.APPLICATION_JSON);
+
+        HttpEntity<String> entity = new HttpEntity<>(request.toString(), headers);
+
+        ResponseEntity<String> response = restTemplate
+                .exchange(createUri(teamResource), HttpMethod.POST, entity, String.class);
+
+        assertEquals(CREATED, response.getStatusCode());
+        String expectedLocation = "/jaxson" + teamResource + teamId;
+        assertTrue(response.getHeaders().getLocation().toString().endsWith(expectedLocation));
+    }
+
+    @Test
+    public void getTeamById() throws URISyntaxException {
+        given(teamService.getById(teamId)).willReturn(team);
+
+        ResponseEntity<TeamDto> response = restTemplate.exchange(createUri(teamResource + teamId), HttpMethod.GET, getHttpEntity(), TeamDto.class);
         assertEquals(OK, response.getStatusCode());
         assertEquals(new TeamDto(team), response.getBody());
     }
