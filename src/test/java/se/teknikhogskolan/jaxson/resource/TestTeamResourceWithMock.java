@@ -13,9 +13,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
-import org.springframework.stereotype.Component;
+import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.teknikhogskolan.jaxson.model.TeamDto;
@@ -25,11 +26,11 @@ import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 
 import javax.ws.rs.core.MediaType;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -97,6 +98,27 @@ public class TestTeamResourceWithMock {
                 .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), Void.class);
 
         assertEquals(NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void notAllowedToChangeTeamId() {
+        given(teamService.getById(teamId)).willReturn(mockedTeam);
+        when(mockedTeam.isActive()).thenReturn(false);
+        Long oldId = 16546312L;
+        when(mockedTeam.getId()).thenReturn(oldId);
+
+        JSONObject newTeamValues = new JSONObject();
+        Long newId = 2365L;
+        newTeamValues.put("id", newId);
+        newTeamValues.put("active", true);
+
+        restTemplate.setErrorHandler(new responseErrorIgnorer());
+
+        ResponseEntity<String> response = restTemplate
+                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), String.class);
+        assertEquals(FORBIDDEN, response.getStatusCode());
+        String expectedMessage = "Not allowed to update id on Team. Team id was '1001', id in request body was '2365'";
+        assertEquals(expectedMessage, response.getBody());
     }
 
     @Test
@@ -194,5 +216,27 @@ public class TestTeamResourceWithMock {
         headers.set("Accept", MediaType.APPLICATION_JSON);
         headers.set("Content-Type", MediaType.APPLICATION_JSON);
         return (null == body) ? new HttpEntity<>(headers) : new HttpEntity<>(body.toString(), headers);
+    }
+
+    private static class responseErrorIgnorer implements ResponseErrorHandler {
+
+        @Override
+        public void handleError(ClientHttpResponse clienthttpresponse) throws IOException {
+            // Do nothing
+        }
+
+        @Override
+        public boolean hasError(ClientHttpResponse clienthttpresponse) throws IOException {
+
+            if (clienthttpresponse.getStatusCode() != HttpStatus.OK) {
+                // has error
+                // filter response codes
+                if (clienthttpresponse.getStatusCode() == HttpStatus.FORBIDDEN) {
+                    // let 403 slip through
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 }
