@@ -11,12 +11,15 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
+import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.springcasemanagement.model.Team;
+import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
+import se.teknikhogskolan.springcasemanagement.service.UserService;
 
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
@@ -43,8 +46,14 @@ public class TestTeamResourceWithMock {
     @MockBean
     private TeamService teamService;
 
+    @MockBean
+    private UserService userService;
+
     @Mock
     Team mockedTeam;
+
+    @Mock
+    User mockedUser;
 
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
@@ -68,7 +77,24 @@ public class TestTeamResourceWithMock {
     }
 
     @Test
-    public void canAddUserToTeam() {
+    public void canAddUserToTeamUsingUsernumber() {
+        Long usernumber = 1001L;
+        Long userId = 64648949L;
+        given(userService.getByUserNumber(usernumber)).willReturn(mockedUser);
+        when(mockedUser.getId()).thenReturn(userId);
+        given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
+
+        JSONObject userToAdd = new JSONObject();
+        userToAdd.put("userNumber", usernumber);
+
+        ResponseEntity<Void> response = restTemplate
+                .exchange(createUri(teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
+
+        assertEquals(NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void canAddUserToTeamUsingUserId() {
         Long userId = 1001L;
         given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
 
