@@ -2,7 +2,9 @@ package se.teknikhogskolan.jaxson.resource;
 
 import org.json.JSONObject;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +15,7 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.teknikhogskolan.jaxson.model.TeamDto;
@@ -24,6 +27,8 @@ import se.teknikhogskolan.springcasemanagement.service.UserService;
 import javax.ws.rs.core.MediaType;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -35,9 +40,7 @@ import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
 import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static org.springframework.http.HttpStatus.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -54,6 +57,9 @@ public class TestTeamResourceWithMock {
 
     @Mock
     User mockedUser;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
 
     @Autowired
     RestTemplateBuilder restTemplateBuilder;
@@ -105,6 +111,22 @@ public class TestTeamResourceWithMock {
                 .exchange(createUri(teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
 
         assertEquals(NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
+    public void createTeamWithUsersShouldReturnForbidden() throws URISyntaxException {
+        given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
+        when(mockedTeam.getId()).thenReturn(teamId);
+        exception.expect(HttpClientErrorException.class);
+        exception.expectMessage("403 null");
+
+        JSONObject teamToCreate = new JSONObject();
+        teamToCreate.put("name", mockedTeam.getName());
+        Collection<Long> usersId = new ArrayList<>();
+        usersId.add(24564L);
+        teamToCreate.put("usersId", usersId);
+
+        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
     }
 
     @Test
