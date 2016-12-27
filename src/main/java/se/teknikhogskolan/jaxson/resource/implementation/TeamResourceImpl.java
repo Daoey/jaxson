@@ -41,7 +41,7 @@ public final class TeamResourceImpl implements TeamResource {
     public Response createTeam(TeamDto teamDto) {
         if (usersIn(teamDto)) { // TODO move to filter(?)
             throw new ForbiddenOperationException(
-                    "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}");
+                    "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}/users");
         }
         if (null != teamDto.getId()) { // TODO move to filter(?)
             throw new ForbiddenOperationException(String.format(
