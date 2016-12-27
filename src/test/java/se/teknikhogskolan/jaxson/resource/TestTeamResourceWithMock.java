@@ -39,6 +39,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -90,9 +91,9 @@ public class TestTeamResourceWithMock {
         List<Team> teams = new ArrayList<>();
         teams.add(mockedTeam);
         given(teamService.getAll()).willReturn(teams);
-        ResponseEntity<Collection> response = restTemplate
-                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
-        assertFalse(response.getBody().isEmpty());
+        ResponseEntity<TeamDto[]> response = restTemplate
+                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
+        assertEquals(1, response.getBody().length);
     }
 
     @Test
