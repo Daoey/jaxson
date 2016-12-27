@@ -115,8 +115,6 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void createTeamWithUsersShouldReturnForbidden() throws URISyntaxException {
-        given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
-        when(mockedTeam.getId()).thenReturn(teamId);
         exception.expect(HttpClientErrorException.class);
         exception.expectMessage("403 null");
 
@@ -125,6 +123,18 @@ public class TestTeamResourceWithMock {
         Collection<Long> usersId = new ArrayList<>();
         usersId.add(24564L);
         teamToCreate.put("usersId", usersId);
+
+        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
+    }
+
+    @Test
+    public void createTeamPassingTeamIdShouldReturnForbidden() throws URISyntaxException {
+        exception.expect(HttpClientErrorException.class);
+        exception.expectMessage("403 null");
+
+        JSONObject teamToCreate = new JSONObject();
+        teamToCreate.put("name", mockedTeam.getName());
+        teamToCreate.put("id", 216516L);
 
         restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
     }
