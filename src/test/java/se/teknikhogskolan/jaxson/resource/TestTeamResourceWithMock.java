@@ -31,10 +31,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.when;
@@ -81,6 +83,24 @@ public class TestTeamResourceWithMock {
     public void setup() {
         baseUrl = "http://localhost:" + randomPort + "/jaxson";
         restTemplate = restTemplateBuilder.build();
+    }
+
+    @Test
+    public void canGetAllTeams() {
+        List<Team> teams = new ArrayList<>();
+        teams.add(mockedTeam);
+        given(teamService.getAll()).willReturn(teams);
+        ResponseEntity<Collection> response = restTemplate
+                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
+        assertFalse(response.getBody().isEmpty());
+    }
+
+    @Test
+    public void getAllTeamsShouldReturnEmptyArrayIfNoTeamsExist() {
+        given(teamService.getAll()).willReturn(new ArrayList<>());
+        ResponseEntity<Collection> response = restTemplate
+                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
+        assertTrue(response.getBody().isEmpty());
     }
 
     @Test
