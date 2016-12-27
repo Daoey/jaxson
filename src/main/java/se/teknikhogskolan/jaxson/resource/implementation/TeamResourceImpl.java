@@ -43,6 +43,11 @@ public final class TeamResourceImpl implements TeamResource {
             throw new ForbiddenOperationException(
                     "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}");
         }
+        if (null != teamDto.getId()) {
+            throw new ForbiddenOperationException(String.format(
+                    "Cannot create Team, Team with id '%d' already exist. To update Team use PUT to ../teams/{teamId}" ,
+                    teamDto.getId()));
+        }
         Team team = teamService.create(teamDto.getName());
 
         if (inactiveStatusIsRequested(teamDto)) {
