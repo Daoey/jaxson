@@ -83,6 +83,23 @@ public class TestTeamResourceWithMock {
     }
 
     @Test
+    public void canUpdateTeam() {
+        String oldName = "Old team name";
+        given(teamService.getById(teamId)).willReturn(mockedTeam);
+        when(mockedTeam.isActive()).thenReturn(true);
+        when(mockedTeam.getName()).thenReturn(oldName);
+
+        JSONObject newTeamValues = new JSONObject();
+        newTeamValues.put("name", "New much cooler name");
+        newTeamValues.put("active", false);
+
+        ResponseEntity<Void> response = restTemplate
+                .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), Void.class);
+
+        assertEquals(NO_CONTENT, response.getStatusCode());
+    }
+
+    @Test
     public void canAddUserToTeamUsingUsernumber() {
         Long usernumber = 1001L;
         Long userId = 64648949L;
