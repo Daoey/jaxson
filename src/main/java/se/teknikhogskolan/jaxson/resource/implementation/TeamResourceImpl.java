@@ -64,11 +64,11 @@ public final class TeamResourceImpl implements TeamResource {
     @Override
     public Response updateTeam(Long id, TeamDto newValuesTeamDto) {
 
-        stopAttemptsToUpdateTeamId(id, newValuesTeamDto);
+        stopAttemptsToUpdateTeamId(id, newValuesTeamDto); // TODO move to filter(?)
 
         Team teamModel = getTeamModelById(id);
 
-        stopAttemptsToUpdateInactiveTeam(teamModel, newValuesTeamDto);
+        stopAttemptsToUpdateInactiveTeam(teamModel, newValuesTeamDto); // TODO move to filter(?)
 
         update(teamModel, newValuesTeamDto);
 
