@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.model;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -27,19 +28,23 @@ public final class UserDto extends AbstractModel {
         this.firstName = user.getFirstName();
         this.lastName = user.getLastName();
         this.active = user.isActive();
-        this.workItemsId = setWorkItemsId(user);
+        setWorkItemsId(getWorkItemsIdsFromUser(user));
 
         if (user.getTeam() != null) {
             this.teamId = user.getTeam().getId();
         }
     }
 
-    private Collection<Long> setWorkItemsId(User user) {
+    private Collection<Long> getWorkItemsIdsFromUser(User user) {
         Collection<Long> result = new ArrayList<>();
         if (null != user.getWorkItems()) {
             user.getWorkItems().forEach(workItem -> result.add(workItem.getId()));
         }
         return result;
+    }
+
+    private void setWorkItemsId(Collection<Long> workItemsId) {
+        this.workItemsId = workItemsId;
     }
 
     public Long getUserNumber() {

@@ -20,6 +20,7 @@ import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.teknikhogskolan.jaxson.model.TeamDto;
+import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
@@ -29,10 +30,7 @@ import javax.ws.rs.core.MediaType;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
@@ -84,6 +82,16 @@ public class TestTeamResourceWithMock {
     public void setup() {
         baseUrl = "http://localhost:" + randomPort + "/jaxson";
         restTemplate = restTemplateBuilder.build();
+    }
+
+    @Test
+    public void canGetUsersInTeam() {
+        List<User> users = new ArrayList<>();
+        users.add(mockedUser);
+        given(userService.getAllByTeamId(teamId)).willReturn(users);
+        ResponseEntity<UserDto[]> response = restTemplate
+                .exchange(createUri(teamResource + teamId + "/users"), GET, createHttpEntity(null, null), UserDto[].class);
+        assertEquals(1, response.getBody().length);
     }
 
     @Test
