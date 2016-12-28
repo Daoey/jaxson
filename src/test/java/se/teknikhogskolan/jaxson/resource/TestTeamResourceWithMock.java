@@ -21,10 +21,13 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.model.User;
+import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
+import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
 import javax.ws.rs.core.MediaType;
 import java.io.IOException;
@@ -32,12 +35,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Matchers.booleanThat;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -53,6 +53,9 @@ public class TestTeamResourceWithMock {
 
     @MockBean
     private UserService userService;
+
+    @MockBean
+    private WorkItemService workItemService;
 
     @Mock
     Team mockedTeam;
@@ -82,6 +85,19 @@ public class TestTeamResourceWithMock {
     public void setup() {
         baseUrl = "http://localhost:" + randomPort + "/jaxson";
         restTemplate = restTemplateBuilder.build();
+    }
+
+    @Test
+    public void canGetWorkItemsInTeam() {
+        Collection<WorkItem> workItems = new ArrayList<>();
+        String workItemDescription = "Test get all WorkItems in a Team";
+        WorkItem workItem = new WorkItem(workItemDescription);
+        workItems.add(workItem);
+        given(workItemService.getByTeamId(teamId)).willReturn(workItems);
+        ResponseEntity<WorkItemDto[]> response = restTemplate
+                .exchange(createUri(teamResource + teamId + "/workitems"), GET, createHttpEntity(null, null), WorkItemDto[].class);
+        WorkItemDto workItemInResponse = Arrays.asList(response.getBody()).get(0);
+        assertEquals(workItemDescription, workItemInResponse.getDescription());
     }
 
     @Test
