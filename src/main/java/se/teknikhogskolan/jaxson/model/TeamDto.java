@@ -27,45 +27,23 @@ public final class TeamDto extends AbstractModel {
         setId(team.getId());
         this.name = team.getName();
         this.active = team.isActive();
-        setUsersId(team);
+        setUsersId(getUsersIdsFromTeam(team));
         setCreated(team.getCreated());
         setLastModified(team.getLastModified());
     }
 
     public TeamDto(){}
 
-    public void setActive(Boolean active) {
-        this.active = (null == active) ? true : active;
-    }
-
-    private void setUsersId(Object object) {
-        if (setUsersIdInvokedByTeamConstructor(object)) {
-            handleAsTeam(object); // Team has Collection<User>, User has Long id
-        }
-        if (setUsersIdInvokedByJaxRs(object)) {
-            handleAsCollectionOfLong(object); // Collection<Long> is collection of id
-        }
-    }
-
-    private boolean setUsersIdInvokedByTeamConstructor(Object object) {
-        return object instanceof Team;
-    }
-
-    private void handleAsTeam(Object object) {
-        Team team = (Team) object;
+    private Collection<Long> getUsersIdsFromTeam(Team team) {
         Collection<Long> result = new ArrayList<>();
         if (null != team.getUsers()) {
             team.getUsers().forEach(user -> result.add(user.getId()));
         }
-        this.usersId = result;
+        return result;
     }
 
-    private boolean setUsersIdInvokedByJaxRs(Object object) {
-        return object instanceof Collection;
-    }
-
-    private void handleAsCollectionOfLong(Object object) {
-        this.usersId = (Collection<Long>) object;
+    private void setUsersId(Collection<Long> usersId) {
+        this.usersId = usersId;
     }
 
     public String getName() {
