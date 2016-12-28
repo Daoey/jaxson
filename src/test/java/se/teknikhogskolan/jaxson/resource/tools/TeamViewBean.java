@@ -1,4 +1,4 @@
-package se.teknikhogskolan.jaxson.model;
+package se.teknikhogskolan.jaxson.resource.tools;
 
 import java.util.ArrayList;
 import java.util.Collection;

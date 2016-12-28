@@ -9,7 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
-import se.teknikhogskolan.jaxson.model.TeamViewBean;
+import se.teknikhogskolan.jaxson.resource.tools.TeamViewBean;
 import se.teknikhogskolan.springcasemanagement.config.h2.H2InfrastructureConfig;
 
 import javax.ws.rs.client.Client;
