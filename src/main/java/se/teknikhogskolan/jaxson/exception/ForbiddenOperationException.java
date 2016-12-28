@@ -10,6 +10,8 @@ public final class ForbiddenOperationException extends WebApplicationException {
     private static final long serialVersionUID = 1L;
 
     public ForbiddenOperationException(String message) {
-        super(Response.status(FORBIDDEN).entity(message).build());
+        super(Response.status(FORBIDDEN)
+                .entity(new ErrorMessage(FORBIDDEN.getStatusCode(), FORBIDDEN.toString(), message))
+                .build());
     }
 }

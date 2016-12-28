@@ -13,6 +13,8 @@ public final class MaximumQuantityExceptionMapper implements ExceptionMapper<Max
 
     @Override
     public Response toResponse(MaximumQuantityException exception) {
-        return Response.status(FORBIDDEN).entity(exception.getMessage()).build();
+        return Response.status(FORBIDDEN)
+                .entity(new ErrorMessage(FORBIDDEN.getStatusCode(), FORBIDDEN.toString(), exception.getMessage()))
+                .build();
     }
 }

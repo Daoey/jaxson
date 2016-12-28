@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.exception;
 
+import static javax.ws.rs.core.Response.Status.CONFLICT;
 import static javax.ws.rs.core.Response.Status.INTERNAL_SERVER_ERROR;
 
 import javax.ws.rs.core.Response;
@@ -11,6 +12,8 @@ public class RuntimeExceptionMapper implements ExceptionMapper<RuntimeException>
 
     @Override
     public Response toResponse(RuntimeException exception) {
-        return Response.status(INTERNAL_SERVER_ERROR).entity(exception.getMessage()).build();
+        return Response.status(INTERNAL_SERVER_ERROR)
+                .entity(new ErrorMessage(CONFLICT.getStatusCode(), CONFLICT.toString(), exception.getMessage()))
+                .build();
     }
 }

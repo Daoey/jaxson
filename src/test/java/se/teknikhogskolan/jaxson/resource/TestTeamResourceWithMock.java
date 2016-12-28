@@ -19,6 +19,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+import se.teknikhogskolan.jaxson.exception.ErrorMessage;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
@@ -159,11 +160,13 @@ public class TestTeamResourceWithMock {
 
         restTemplate.setErrorHandler(new responseErrorIgnorer());
 
-        ResponseEntity<String> response = restTemplate
-                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), String.class);
+        ResponseEntity<ErrorMessage> response = restTemplate
+                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), ErrorMessage.class);
         assertEquals(FORBIDDEN, response.getStatusCode());
+        assertEquals(403, response.getBody().getCode());
+        assertEquals("Forbidden", response.getBody().getStatus());
         String expectedMessage = "Not allowed to update id on Team. Team id was '1001', id in request body was '2365'";
-        assertEquals(expectedMessage, response.getBody());
+        assertEquals(expectedMessage, response.getBody().getMessage());
     }
 
     @Test

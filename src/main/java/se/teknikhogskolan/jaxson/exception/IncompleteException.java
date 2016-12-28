@@ -10,6 +10,8 @@ public final class IncompleteException extends WebApplicationException {
     private static final long serialVersionUID = 1L;
 
     public IncompleteException(String message) {
-        super(Response.status(BAD_REQUEST).entity(message).build());
+        super(Response.status(BAD_REQUEST)
+                .entity(new ErrorMessage(BAD_REQUEST.getStatusCode(), BAD_REQUEST.toString(), message))
+                .build());
     }
 }

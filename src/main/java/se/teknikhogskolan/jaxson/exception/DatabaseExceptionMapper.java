@@ -13,6 +13,10 @@ public final class DatabaseExceptionMapper implements ExceptionMapper<DatabaseEx
 
     @Override
     public Response toResponse(DatabaseException exception) {
-        return Response.status(INTERNAL_SERVER_ERROR).entity(exception.getMessage()).build();
+        return Response.status(INTERNAL_SERVER_ERROR)
+                .entity(new ErrorMessage(INTERNAL_SERVER_ERROR.getStatusCode(),
+                        INTERNAL_SERVER_ERROR.toString(),
+                        exception.getMessage()))
+                .build();
     }
 }
