@@ -5,7 +5,7 @@ import java.time.format.DateTimeFormatter;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem.Status;
 
-public final class WorkItemDto extends AbstractModel {
+public final class WorkItemDto extends AbstractDto {
 
     private String description;
 
@@ -25,8 +25,12 @@ public final class WorkItemDto extends AbstractModel {
     public WorkItemDto(WorkItem workItem) {
         
         setId(workItem.getId());
-        setCreated(workItem.getCreated());
-        setLastModified(workItem.getLastModified());
+        if (null != workItem.getCreated()) {
+            setCreated(workItem.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
+        if (null != workItem.getLastModified()) {
+            setLastModified(workItem.getLastModified().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
         description = workItem.getDescription();
         status = workItem.getStatus();
 

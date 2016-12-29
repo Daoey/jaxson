@@ -1,12 +1,12 @@
 package se.teknikhogskolan.jaxson.model;
 
-import java.text.ParseException;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import se.teknikhogskolan.springcasemanagement.model.User;
 
-public final class UserDto extends AbstractModel {
+public final class UserDto extends AbstractDto {
 
     private Long userNumber;
     private String username;
@@ -21,8 +21,12 @@ public final class UserDto extends AbstractModel {
 
     public UserDto(User user) {
         setId(user.getId());
-        setCreated(user.getCreated());
-        setLastModified(user.getLastModified());
+        if (null != user.getCreated()) {
+            setCreated(user.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
+        if (null != user.getLastModified()) {
+            setLastModified(user.getLastModified().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
         this.userNumber = user.getUserNumber();
         this.username = user.getUsername();
         this.firstName = user.getFirstName();

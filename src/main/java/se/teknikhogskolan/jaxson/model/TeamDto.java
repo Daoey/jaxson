@@ -1,11 +1,12 @@
 package se.teknikhogskolan.jaxson.model;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import se.teknikhogskolan.springcasemanagement.model.Team;
 
-public final class TeamDto extends AbstractModel {
+public final class TeamDto extends AbstractDto {
 
     private String name;
 
@@ -28,8 +29,12 @@ public final class TeamDto extends AbstractModel {
         this.name = team.getName();
         this.active = team.isActive();
         setUsersId(getUsersIdsFromTeam(team));
-        setCreated(team.getCreated());
-        setLastModified(team.getLastModified());
+        if (null != team.getCreated()) {
+            setCreated(team.getCreated().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
+        if (null != team.getLastModified()) {
+            setLastModified(team.getLastModified().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        }
     }
 
     public TeamDto(){}
