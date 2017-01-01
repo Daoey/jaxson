@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.client.Client;
@@ -16,6 +17,8 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.model.UserDto;
@@ -32,18 +35,20 @@ public final class TestUserResource {
     private static Client client;
     private String baseUrl;
     private UserDto userInDb;
+    private static final String auth = "Authorization";
+    private static final String authCode = "Basic cm9vdDpzZWNyZXQ=";
     @LocalServerPort
     private int randomPort;
 
     @BeforeClass
     public static void initialize() {
         client = ClientBuilder.newClient();
-        userInDb = new UserDto(new User(1L, "Robotarm Luke", "Luke", "Skywalker"));
     }
 
     @Before
     public void setUp() {
         baseUrl = String.format("http://localhost:%d/jaxson/", randomPort);
+        userInDb = new UserDto(new User(1L, "Robotarm Luke", "Luke", "Skywalker"));
     }
 
     @Test
