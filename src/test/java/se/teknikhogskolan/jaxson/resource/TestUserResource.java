@@ -60,9 +60,8 @@ public final class TestUserResource {
     }
 
     @Test
-    public void canGetAllUsers() {
-        Response response = client.target(baseUrl).path("users").request().header(auth, authCode).get();
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    public void canGetUserByUserNumber() throws Exception {
+
     }
 
     @Test
@@ -78,12 +77,15 @@ public final class TestUserResource {
         // client.target(baseUrl).path("users/1").request().put();
     }
 
-
+    @Test
+    public void canGetAllUsers() {
+        Response response = client.target(baseUrl).path("users").request().header(auth, authCode).get();
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
 
     @Test
-    public void getAllWorkItemsFromUserWithoutWorkItemsReturnsNotFound() {
-        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
-        assertEquals(NOT_FOUND, response.getStatusInfo());
+    public void canGetAllWorkItemsFromUser() throws Exception {
+
     }
 
     @Test
@@ -91,5 +93,11 @@ public final class TestUserResource {
         // TODO implement canAssignWorkItemToUser test
         // Response response =
         // client.target(baseUrl).path("users/1/workitems").request().put();
+    }
+
+    @Test
+    public void getAllWorkItemsFromUserWithoutWorkItemsReturnsNotFound() {
+        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
+        assertEquals(NOT_FOUND, response.getStatusInfo());
     }
 }
