@@ -5,7 +5,6 @@ import static org.junit.Assert.assertEquals;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.SyncInvoker;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -17,8 +16,6 @@ import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.model.UserDto;
@@ -33,10 +30,10 @@ import se.teknikhogskolan.springcasemanagement.model.User;
 public final class TestUserResource {
 
     private static Client client;
+    private String baseUrl;
+    private UserDto userInDb;
     @LocalServerPort
     private int randomPort;
-    private String baseUrl;
-    private static UserDto userInDb;
 
     @BeforeClass
     public static void initialize() {
@@ -46,47 +43,45 @@ public final class TestUserResource {
 
     @Before
     public void setUp() {
-        baseUrl = "http://localhost:" + randomPort + "/jaxson/";
+        baseUrl = String.format("http://localhost:%d/jaxson/", randomPort);
+    }
+
+    @Test
+    public void canGetAllUsers() {
+        Response response = client.target(baseUrl).path("users").request().header(auth, authCode).get();
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
+    public void getUserByUserNumberWithoutMatchShouldReturnResponseNotFound() {
+        Response response = client.target(baseUrl).path("users/1").request().header(auth, authCode).get();
+        assertEquals(NOT_FOUND, response.getStatusInfo());
+    }
+
+    @Test
+    public void canUpdateUser() {
+        // TODO implement canUpdateUser test
+        // Response response =
+        // client.target(baseUrl).path("users/1").request().put();
     }
 
     @Test
     public void canCreateUser() throws Exception {
-        Response response = client.target(baseUrl).path("users").request()
+        Response response = client.target(baseUrl).path("users").request().header(auth, authCode)
                 .post(Entity.entity(new User(457L, "canCreateUser", "temp", "temp"), MediaType.APPLICATION_JSON));
 
         assertEquals(Response.Status.CREATED.getStatusCode(), response.getStatus());
     }
 
     @Test
-    public void canGetUserByUserNumber() {
-        Response response = client.target(baseUrl).path("users/1").request().get();
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-        UserDto userFromDb = response.readEntity(UserDto.class);
-        System.out.println(userFromDb);
-        assertEquals(userInDb, userFromDb);
-    }
-
-    @Test
-    public void canUpdateUser() {
-        // Response response =
-        // client.target(baseUrl).path("users/1").request().put();
-    }
-
-    @Test
-    public void canGetAllUsers() {
-        Response response = client.target(baseUrl).path("users").request().get();
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
-    }
-
-
-    @Test
-    public void canGetAllWorkItemsFromUser() {
-        Response response = client.target(baseUrl).path("users/1/workitems").request().get();
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    public void getAllWorkItemsFromUserWithoutWorkItemsReturnsNotFound() {
+        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
+        assertEquals(NOT_FOUND, response.getStatusInfo());
     }
 
     @Test
     public void canAssignWorkItemToUser() {
+        // TODO implement canAssignWorkItemToUser test
         // Response response =
         // client.target(baseUrl).path("users/1/workitems").request().put();
     }

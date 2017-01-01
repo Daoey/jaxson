@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 
 import javax.ws.rs.client.Client;
@@ -21,6 +22,8 @@ import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
 
+import java.net.URI;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JaxsonApplication.class, webEnvironment = WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = { HsqlInfrastructureConfig.class })
@@ -38,15 +41,11 @@ public class TestWorkItemResource {
 
     @Test
     public void addAWorkItemAndGetItFromInMemoryDatabase() {
-        
-        System.out.println("Port: " + randomPort);
-
-        client.target("http://localhost:" + randomPort + "/jaxson/").path("workitems").request()
-                .post(Entity.entity(new WorkItemDto("some description"), MediaType.APPLICATION_JSON));
-
-        Response response = client.target("http://localhost:" + randomPort + "/jaxson/").path("workitems/1").request()
-                .get();
-                
-        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+        String baseUrl = "http://localhost:" + randomPort + "/jaxson/";
+        String resource = "workitems";
+        URI workItemLocation = client.target(baseUrl).path(resource).request().header("Authorization", "Basic cm9vdDpzZWNyZXQ=").post(Entity.entity(
+                new WorkItemDto("some description"), MediaType.APPLICATION_JSON)).getLocation();
+        Response result = client.target(workItemLocation).request().header("Authorization", "Basic cm9vdDpzZWNyZXQ=").get();
+        assertEquals(OK, result.getStatusInfo());
     }
 }
