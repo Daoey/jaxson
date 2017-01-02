@@ -1,5 +1,23 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.when;
+import static org.springframework.http.HttpMethod.GET;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import javax.ws.rs.core.MediaType;
+
 import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.Rule;
@@ -12,7 +30,10 @@ import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
@@ -30,24 +51,23 @@ import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
 
-import javax.ws.rs.core.MediaType;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.*;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.when;
-import static org.springframework.http.HttpMethod.GET;
-import static org.springframework.http.HttpMethod.POST;
-import static org.springframework.http.HttpMethod.PUT;
-import static org.springframework.http.HttpStatus.*;
-
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class TestTeamResourceWithMock {
+
+    private static String baseUrl;
+
+    @Rule
+    public ExpectedException exception = ExpectedException.none();
+
+    @Autowired
+    private RestTemplateBuilder restTemplateBuilder;
+
+    @Mock
+    private Team mockedTeam;
+
+    @Mock
+    private User mockedUser;
 
     @MockBean
     private TeamService teamService;
@@ -58,22 +78,9 @@ public class TestTeamResourceWithMock {
     @MockBean
     private WorkItemService workItemService;
 
-    @Mock
-    Team mockedTeam;
-
-    @Mock
-    User mockedUser;
-
-    @Rule
-    public ExpectedException exception = ExpectedException.none();
-
-    @Autowired
-    RestTemplateBuilder restTemplateBuilder;
-
     @LocalServerPort
     private int randomPort;
 
-    private static String baseUrl;
     private RestTemplate restTemplate;
     private final String auth = "Authorization";
     private final String authCode = "Basic cm9vdDpzZWNyZXQ=";
@@ -96,7 +103,8 @@ public class TestTeamResourceWithMock {
         workItems.add(workItem);
         given(workItemService.getByTeamId(teamId)).willReturn(workItems);
         ResponseEntity<WorkItemDto[]> response = restTemplate
-                .exchange(createUri(teamResource + teamId + "/workitems"), GET, createHttpEntity(null, null), WorkItemDto[].class);
+                .exchange(createUri(teamResource + teamId + "/workitems"), GET, createHttpEntity(null, null),
+                        WorkItemDto[].class);
         WorkItemDto workItemInResponse = Arrays.asList(response.getBody()).get(0);
         assertEquals(workItemDescription, workItemInResponse.getDescription());
     }
@@ -107,7 +115,8 @@ public class TestTeamResourceWithMock {
         users.add(mockedUser);
         given(userService.getAllByTeamId(teamId)).willReturn(users);
         ResponseEntity<UserDto[]> response = restTemplate
-                .exchange(createUri(teamResource + teamId + "/users"), GET, createHttpEntity(null, null), UserDto[].class);
+                .exchange(createUri(teamResource + teamId + "/users"), GET,
+                        createHttpEntity(null, null), UserDto[].class);
         assertEquals(1, response.getBody().length);
     }
 
@@ -143,7 +152,7 @@ public class TestTeamResourceWithMock {
         ResponseEntity<Void> response = restTemplate
                 .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), Void.class);
 
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
@@ -158,13 +167,12 @@ public class TestTeamResourceWithMock {
         newTeamValues.put("id", newId);
         newTeamValues.put("active", true);
 
-        restTemplate.setErrorHandler(new responseErrorIgnorer());
+        restTemplate.setErrorHandler(new ResponseErrorIgnorer());
 
         ResponseEntity<ErrorMessage> response = restTemplate
-                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), ErrorMessage.class);
-        assertEquals(FORBIDDEN, response.getStatusCode());
-        assertEquals(403, response.getBody().getCode());
-        assertEquals("Forbidden", response.getBody().getStatus());
+                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null),
+                            ErrorMessage.class);
+        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
         String expectedMessage = "Not allowed to update id on Team. Team id was '1001', id in request body was '2365'";
         assertEquals(expectedMessage, response.getBody().getMessage());
     }
@@ -180,10 +188,10 @@ public class TestTeamResourceWithMock {
         JSONObject userToAdd = new JSONObject();
         userToAdd.put("userNumber", usernumber);
 
-        ResponseEntity<Void> response = restTemplate
-                .exchange(createUri(teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(createUri(
+                teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
 
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
@@ -195,9 +203,10 @@ public class TestTeamResourceWithMock {
         userToAdd.put("id", "1001");
 
         ResponseEntity<Void> response = restTemplate
-                .exchange(createUri(teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
+                .exchange(createUri(teamResource + teamId + "/users"), PUT,
+                        createHttpEntity(userToAdd, null), Void.class);
 
-        assertEquals(NO_CONTENT, response.getStatusCode());
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
 
     @Test
@@ -238,7 +247,7 @@ public class TestTeamResourceWithMock {
         ResponseEntity<String> response = restTemplate
                 .exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
 
-        assertEquals(CREATED, response.getStatusCode());
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
         String expectedLocation = "/jaxson" + teamResource + teamId;
         assertTrue(response.getHeaders().getLocation().toString().endsWith(expectedLocation));
     }
@@ -248,7 +257,7 @@ public class TestTeamResourceWithMock {
         given(teamService.getById(teamId)).willReturn(team);
         ResponseEntity<TeamDto> response = restTemplate.exchange(
                 createUri(teamResource + teamId), GET, createHttpEntity(null, null), TeamDto.class);
-        assertEquals(OK, response.getStatusCode());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(new TeamDto(team), response.getBody());
     }
 
@@ -259,15 +268,14 @@ public class TestTeamResourceWithMock {
 
     private HttpEntity<?> createHttpEntity(JSONObject body, Map<String, Object> headParameters) {
         HttpHeaders headers = new HttpHeaders();
-        if (null != headParameters) headParameters.forEach((k, v) -> headers.set(k, v.toString()));
+        if (null != headParameters) headParameters.forEach((key, value) -> headers.set(key, value.toString()));
         headers.set(auth, authCode);
         headers.set("Accept", MediaType.APPLICATION_JSON);
         headers.set("Content-Type", MediaType.APPLICATION_JSON);
         return (null == body) ? new HttpEntity<>(headers) : new HttpEntity<>(body.toString(), headers);
     }
 
-    private static class responseErrorIgnorer implements ResponseErrorHandler {
-
+    private static class ResponseErrorIgnorer implements ResponseErrorHandler {
         @Override
         public void handleError(ClientHttpResponse clienthttpresponse) throws IOException {
             // Do nothing
