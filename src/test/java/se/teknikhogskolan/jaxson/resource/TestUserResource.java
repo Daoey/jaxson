@@ -29,8 +29,10 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.model.UserDto;
+import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
 import se.teknikhogskolan.springcasemanagement.model.User;
+import se.teknikhogskolan.springcasemanagement.model.WorkItem;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = JaxsonApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -76,6 +78,14 @@ public final class TestUserResource {
     }
 
     @Test
+    public void creatingUserWithoutUsernameShouldReturnBadRequest() throws Exception {
+        userToCreate.setUsername(null);
+        Response response = client.target(baseUrl).path("users").request().header(auth, authCode)
+                .post(Entity.entity(userToCreate, MediaType.APPLICATION_JSON));
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    @Test
     public void creatingUserWithExistingUserNumberShouldReturnInternalServerError() throws Exception {
         userToCreate.setUserNumber(userInDb.getUserNumber());
         Response response = client.target(baseUrl).path("users").request().header(auth, authCode)
@@ -88,7 +98,7 @@ public final class TestUserResource {
         Response response = client.target(baseUrl).path("users/1").request().header(auth, authCode).get();
         UserDto userFromDb = response.readEntity(UserDto.class);
         assertEquals(OK, response.getStatusInfo());
-        assertEquals(userInDb, userFromDb);
+        assertEquals(new UserDto(userInDb), userFromDb);
     }
 
     @Test
@@ -103,6 +113,14 @@ public final class TestUserResource {
         Response response = client.target(baseUrl).path("users/1").request().header(auth, authCode)
                 .put(Entity.entity(userInDb, MediaType.APPLICATION_JSON));
         assertEquals(NO_CONTENT, response.getStatusInfo());
+    }
+
+    @Test
+    public void updatingUserWithoutUsernameFirstNameOrLastNameShouldReturnBadRequest() {
+        userInDb = new User(1L, null, null, null);
+        Response response = client.target(baseUrl).path("users/1").request().header(auth, authCode)
+                .put(Entity.entity(userInDb, MediaType.APPLICATION_JSON));
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
     }
 
     @Test
@@ -133,7 +151,6 @@ public final class TestUserResource {
         assertEquals(FORBIDDEN, response.getStatusInfo());
     }
 
-
     @Test
     public void canUpdateInactiveUserIfSetToActiveInTheRequest() {
         client.target(baseUrl).path("users/1").request().header(auth, authCode)
@@ -152,20 +169,50 @@ public final class TestUserResource {
     }
 
     @Test
+    public void canGetAllUsersByUsername() {
+        Response response = client.target(baseUrl).path("users").queryParam("username", "Robotarm")
+                .request().header(auth, authCode).get();
+        assertEquals(Response.Status.OK.getStatusCode(), response.getStatus());
+    }
+
+    @Test
     public void canGetAllWorkItemsFromUser() {
-    /*Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
-        assertEquals(OK, response.getStatusInfo());*/
+        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
+        assertEquals(OK, response.getStatusInfo());
     }
 
     @Test
     public void getAllWorkItemsFromUserWithoutWorkItemsReturnsNotFound() {
-        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode).get();
+        Response response = client.target(baseUrl).path("users/5/workitems").request().header(auth, authCode).get();
         assertEquals(NOT_FOUND, response.getStatusInfo());
     }
 
     @Test
     public void canAssignWorkItemToUser() {
-        // Response response =
-        // client.target(baseUrl).path("users/1/workitems").request().put();
+        WorkItemDto workItemWithoutUser = getWorkItemWithoutUser();
+        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode)
+                .put(Entity.entity(workItemWithoutUser, MediaType.APPLICATION_JSON));
+        assertEquals(NO_CONTENT, response.getStatusInfo());
+    }
+
+    @Test
+    public void assigningNonExistingWorkItemToUserShouldReturnBadRequest() {
+        WorkItemDto nonExistingWorkItem = new WorkItemDto(new WorkItem("new workitem"));
+        Response response = client.target(baseUrl).path("users/1/workitems").request().header(auth, authCode)
+                .put(Entity.entity(nonExistingWorkItem, MediaType.APPLICATION_JSON));
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    @Test
+    public void assigningWorkItemToNonExistingUserShouldReturnBadRequest() {
+        WorkItemDto workItemWithoutUser = getWorkItemWithoutUser();
+        Response response = client.target(baseUrl).path("users/68/workitems").request().header(auth, authCode)
+                .put(Entity.entity(workItemWithoutUser, MediaType.APPLICATION_JSON));
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    private WorkItemDto getWorkItemWithoutUser() {
+        Response workItemResponse = client.target(baseUrl).path("workitems/47").request().header(auth, authCode).get();
+        return workItemResponse.readEntity(WorkItemDto.class);
     }
 }

@@ -6,5 +6,6 @@ INSERT INTO User (id, userNumber, active, username, firstName, lastName) VALUES 
 INSERT INTO User (id, userNumber, active, username, firstName, lastName) VALUES (12, 3, true, 'I am your sister', 'Leia', 'Skywalker');
 INSERT INTO User (id, userNumber, active, username, firstName, lastName) VALUES (13, 4, true, 'Master Yoda', 'Yoda', '');
 
-INSERT INTO WorkItem (id, created, description, user_id) VALUES (1, '2016-11-11', 'Destroy deathstar', 10);
-INSERT INTO WorkItem (id, created, description, user_id) VALUES (2, '2016-11-11', 'Train to be a yedi', 10);
+INSERT INTO WorkItem (id, created, description, user_id) VALUES (45, '2016-11-11', 'Destroy deathstar', 10);
+INSERT INTO WorkItem (id, created, description, user_id) VALUES (46, '2016-11-11', 'Train to be a yedi', 10);
+INSERT INTO WorkItem (id, created, description) VALUES (47, '2016-11-17', 'Work item without user');
