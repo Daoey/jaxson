@@ -25,4 +25,14 @@ public final class ErrorMessage {
     public String getMessage() {
         return message;
     }
+
+    @Override
+    public String toString() {
+        final StringBuffer sb = new StringBuffer("ErrorMessage{");
+        sb.append("code=").append(code);
+        sb.append(", status='").append(status).append('\'');
+        sb.append(", message='").append(message).append('\'');
+        sb.append('}');
+        return sb.toString();
+    }
 }
