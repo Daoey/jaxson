@@ -1,7 +1,9 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import static javax.ws.rs.core.Response.Status.FORBIDDEN;
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.PRECONDITION_FAILED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -30,6 +32,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
+import se.teknikhogskolan.jaxson.exception.ErrorMessage;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
@@ -143,6 +146,27 @@ public class TestTeamResource {
         Response response = client.target(teamInDbLocation).request().header(AUTHORIZATION, AUTHORIZATION_CODE).get();
         TeamDto result = response.readEntity(TeamDto.class);
         assertEquals(teamDto, result);
+    }
+
+    @Test
+    public void createAlreadyPersistedTeamShouldReturnForbidden() {
+        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .post(Entity.entity(turtlesTeam, MediaType.APPLICATION_JSON));
+        assertEquals(FORBIDDEN, response.getStatusInfo());
+    }
+
+    @Test
+    public void creatingTwoTeamsWithSameNameShouldReturnErrorMessage() {
+        String turtlesTeamName = turtlesTeam.getName();
+        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .post(Entity.entity(new TeamDto(turtlesTeamName), MediaType.APPLICATION_JSON));
+        ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
+
+        assertEquals(PRECONDITION_FAILED, response.getStatusInfo());
+        assertEquals(PRECONDITION_FAILED.getStatusCode(), errorMessage.getCode());
+        assertEquals(PRECONDITION_FAILED.toString(), errorMessage.getStatus());
+        String errorText = "Team with name '" + turtlesTeamName + "' already exist.";
+        assertEquals(errorText, errorMessage.getMessage());
     }
 
     @Test
