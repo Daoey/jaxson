@@ -2,8 +2,8 @@ package se.teknikhogskolan.jaxson.resource;
 
 import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -21,9 +21,7 @@ import javax.ws.rs.core.Response;
 
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,16 +45,15 @@ public class TestTeamResource {
     private static final String AUTHORIZATION = "Authorization";
     private static final String AUTHORIZATION_CODE = "Basic cm9vdDpzZWNyZXQ=";
     private static Client client;
-    @Rule public ExpectedException thrown = ExpectedException.none();
     @LocalServerPort private int randomPort;
     private WebTarget teamWebTarget;
-    private URI teamInDbLocation;
 
     // Data from insert_team.sql
     private final Long turtlesTeamId = 2001L;
     private final Long clanTeamId = 2002L;
     private TeamDto turtlesTeam;
     private TeamDto clanTeam;
+    private TeamDto inactiveTeam;
 
     @BeforeClass
     public static void initialize() {
@@ -77,6 +74,9 @@ public class TestTeamResource {
                     .header(AUTHORIZATION, AUTHORIZATION_CODE).get(TeamDto.class);
             clanTeam = teamWebTarget.path(clanTeamId.toString()).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
                     .get(TeamDto.class);
+            String inactiveTeamId = "2003";
+            inactiveTeam = teamWebTarget.path(inactiveTeamId).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                    .get(TeamDto.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -85,6 +85,16 @@ public class TestTeamResource {
     @Test
     public void getUsersFromTeamWithoutUsersShouldReturnEmptyList() {
         Response response = teamWebTarget.path(clanTeam.getId().toString() + "/users").request()
+                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+        assertEquals(OK, response.getStatusInfo());
+        List<UserDto> result = response.readEntity(new GenericType<List<UserDto>>(){});
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void canGetUsersFromInactiveTeam() {
+        assertFalse(inactiveTeam.isActive());
+        Response response = teamWebTarget.path(inactiveTeam.getId().toString() + "/users").request()
                 .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
         assertEquals(OK, response.getStatusInfo());
         List<UserDto> result = response.readEntity(new GenericType<List<UserDto>>(){});
@@ -126,7 +136,7 @@ public class TestTeamResource {
     @Test
     public void createTeamReturnsLocation() {
         TeamDto teamDto = new TeamDto("Testing Team");
-        teamInDbLocation = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        URI teamInDbLocation = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
                 .post(Entity.entity(teamDto, MediaType.APPLICATION_JSON)).getLocation();
         assertNotNull(teamInDbLocation);
 
@@ -141,12 +151,6 @@ public class TestTeamResource {
         Response response = teamWebTarget.path(nonExistingTeam).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
                 .get();
         assertEquals(NOT_FOUND, response.getStatusInfo());
-    }
-
-    @Test
-    public void getTeamWithoutAuthorizationShouldReturn403() {
-        Response response = teamWebTarget.path(turtlesTeamId.toString()).request().get();
-        assertEquals(UNAUTHORIZED, response.getStatusInfo());
     }
 
     @Test

@@ -1,5 +1,6 @@
 INSERT INTO Team (id, created, active, name) VALUES (2001, '2016-11-11', true, 'TMNT');
 INSERT INTO Team (id, created, active, name) VALUES (2002, '2016-11-11', true, 'Foot Clan');
+INSERT INTO Team (id, created, active, name) VALUES (2003, '2016-11-11', false, 'Inactive Team');
 
 INSERT INTO User (id, userNumber, created, active, username, firstName, lastName, team_id)
 VALUES (1, 1001, '2016-11-11', true, 'Master Splinter', 'Splinter', 'Yoshi', 2001);
