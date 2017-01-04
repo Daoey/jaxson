@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.IllegalArgumentExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
+import se.teknikhogskolan.jaxson.exception.NotAllowedExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotFoundExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.RuntimeExceptionMapper;
 import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
@@ -29,6 +30,7 @@ public final class JerseyConfig extends ResourceConfig {
         register(DatabaseExceptionMapper.class);
         register(NotFoundExceptionMapper.class);
         register(MaximumQuantityExceptionMapper.class);
+        register(NotAllowedExceptionMapper.class);
         register(IllegalArgumentExceptionMapper.class);
         register(RuntimeExceptionMapper.class);
     }
