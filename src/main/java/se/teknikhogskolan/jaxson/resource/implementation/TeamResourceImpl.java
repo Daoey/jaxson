@@ -12,6 +12,7 @@ import javax.ws.rs.core.UriInfo;
 import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.jaxson.exception.ForbiddenOperationException;
 import se.teknikhogskolan.jaxson.exception.IncompleteException;
+import se.teknikhogskolan.jaxson.exception.PreconditionFailedException;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
@@ -44,7 +45,7 @@ public final class TeamResourceImpl implements TeamResource {
                     "Cannot create Team with Users. Create Team here, then PUT User to ../teams/{teamId}/users");
         }
         if (null != teamDto.getId()) { // TODO move to filter(?)
-            throw new ForbiddenOperationException(String.format(
+            throw new PreconditionFailedException(String.format(
                     "Cannot create Team, Team with id '%d' already exist. To update Team use PUT to ../teams/{teamId}" ,
                     teamDto.getId()));
         }
