@@ -77,27 +77,20 @@ public class TestTeamResource {
         String userResource = "users";
         teamWebTarget = client.target(targetUrl).path(teamResource);
         userWebTarget = client.target(targetUrl).path(userResource);
-        getTeamsFromDatabase();
-    }
 
-    private void getTeamsFromDatabase() {
-        try { // TODO remove try-catch when possible
-            String inactiveUserId = "1010";
-            inactiveUser = userWebTarget.path(inactiveUserId).request()
-                    .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
-            String splinterId = "1001";
-            splinter = userWebTarget.path(splinterId).request()
-                    .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
-            turtles = teamWebTarget.path(turtlesTeamId.toString()).request()
-                    .header(AUTHORIZATION, AUTHORIZATION_CODE).get(TeamDto.class);
-            footClan = teamWebTarget.path(clanTeamId.toString()).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
-                    .get(TeamDto.class);
-            String inactiveTeamId = "2003";
-            inactiveTeam = teamWebTarget.path(inactiveTeamId).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
-                    .get(TeamDto.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        String inactiveUserId = "1010";
+        inactiveUser = userWebTarget.path(inactiveUserId).request()
+                .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
+        String splinterId = "1001";
+        splinter = userWebTarget.path(splinterId).request()
+                .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
+        turtles = teamWebTarget.path(turtlesTeamId.toString()).request()
+                .header(AUTHORIZATION, AUTHORIZATION_CODE).get(TeamDto.class);
+        footClan = teamWebTarget.path(clanTeamId.toString()).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .get(TeamDto.class);
+        String inactiveTeamId = "2003";
+        inactiveTeam = teamWebTarget.path(inactiveTeamId).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .get(TeamDto.class);
     }
 
     @Test
@@ -140,15 +133,6 @@ public class TestTeamResource {
         List<TeamDto> result = response.readEntity(new GenericType<List<TeamDto>>(){});
         assertTrue(result.contains(turtles));
         assertTrue(result.contains(footClan));
-    }
-
-    @Test
-    @Sql("hsql_clean_tables.sql") // TODO move to mocking test
-    public void getAllTeamsShouldReturnEmptyListIfNoTeamExist() {
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE).get();
-        assertEquals(OK, response.getStatusInfo());
-        List<TeamDto> result = response.readEntity(new GenericType<List<TeamDto>>(){});
-        assertTrue(result.isEmpty());
     }
 
     @Test

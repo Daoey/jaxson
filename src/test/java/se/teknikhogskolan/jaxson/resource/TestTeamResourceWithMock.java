@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.resource;
 
+import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -16,7 +17,9 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -35,6 +38,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -128,6 +132,14 @@ public class TestTeamResourceWithMock {
         ResponseEntity<TeamDto[]> response = restTemplate
                 .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
         assertEquals(1, response.getBody().length);
+    }
+
+    @Test
+    public void getAllTeamsShouldReturnEmptyListIfNoTeamExist() {
+        given(teamService.getAll()).willReturn(new ArrayList<>());
+        ResponseEntity<TeamDto[]> response = restTemplate
+                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
+        assertEquals(0, response.getBody().length);
     }
 
     @Test
