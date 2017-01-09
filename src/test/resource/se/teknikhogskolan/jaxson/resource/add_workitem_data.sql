@@ -9,6 +9,8 @@ insert into User (id, username, active, usernumber) values (6546546, 'Crang', fa
 insert into User (id, username, active, usernumber) values (6165111, 'Shredder', true, 20002);
 
 insert into Issue (id, active, description) values (123541, true, 'The turtles need pizza for energy to fight');
+insert into Issue (id, active, description) values (666666, true, 'Can not think of insult');
+
 
 insert into WorkItem (id, created, description, status, user_id) 
 	values (98481111, '2016-11-11', 'Be evil', 'UNSTARTED', 6165111);
@@ -36,3 +38,9 @@ insert into WorkItem (id, created, description, status)
 	
 insert into WorkItem (id, created, description, status, user_id, issue_id) 
 	values (12343456, '2016-11-11', 'Lead TMNT', 'STARTED', 68165, 123541);
+
+insert into WorkItem (id, created, description, status, user_id, issue_id) 
+	values (52378456, '2016-11-11', 'Insult Krang', 'STARTED', 25255, 666666);
+	
+insert into WorkItem (id, created, description, status, user_id) 
+	values (23424242, '2016-11-11', 'Eat pizza', 'DONE', 22523);

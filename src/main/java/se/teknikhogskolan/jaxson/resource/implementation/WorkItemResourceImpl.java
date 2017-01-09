@@ -123,7 +123,6 @@ public final class WorkItemResourceImpl implements WorkItemResource {
     // http://127.0.0.1:8080/jaxson/workitems
     // http://127.0.0.1:8080/jaxson/workitems?page=1&size=1
     private Response getWorkItemsByPage(int page, int size) {
-        // TODO change all paging to pieces or to pages?
         Piece<WorkItem> piece = workItemService.getAllByPiece(page, size);
         List<WorkItem> workItemDaos = piece.getContent();
         return convertCollectionToResponse(workItemDaos);

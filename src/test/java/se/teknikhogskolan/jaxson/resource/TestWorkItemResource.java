@@ -38,6 +38,7 @@ public class TestWorkItemResource {
     private static final String AUTH_CODE = "Basic cm9vdDpzZWNyZXQ=";
     private static final String WORKITEMS = "workitems";
     private static final String WORKITEM_IN_DATABASE = "workitems/98481111";
+    private static final String ISSUE_ASSIGNMENT = "workitems/23424242/issue";
     private static final String WORKITEM_TO_BE_DELETED = "workitems/98422222";
     private static final String NON_EXISTENT_WORKITEM = "workitems/99999999";
     private String baseUrl;
@@ -102,6 +103,43 @@ public class TestWorkItemResource {
     @Test
     public void deleteWorkItemShouldReturnNoContent() {
         Response result = client.target(baseUrl).path(WORKITEM_TO_BE_DELETED).request().header(AUTH, AUTH_CODE)
+                .delete();
+        assertEquals(Status.NO_CONTENT, result.getStatusInfo());
+    }
+
+    @Test
+    public void getAllByPageShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).request().header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
+    public void createAndAssignIssueShouldReturnCreated() {
+        Response result = client.target(baseUrl).path(ISSUE_ASSIGNMENT).request().header(AUTH, AUTH_CODE)
+                .post(Entity.json("{\"description\": \"some issue description\"}"));
+        assertEquals(Status.CREATED, result.getStatusInfo());
+    }
+
+    @Test
+    public void getAssignedIssueShouldReturnOk() {
+        String workItemWithAssignedIssuePath = "workitems/12343456/issue";
+        Response result = client.target(baseUrl).path(workItemWithAssignedIssuePath).request().header(AUTH, AUTH_CODE)
+                .get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
+    public void updateAssignedIssueShouldReturnNoContent() {
+        String workItemWithAssignedIssuePath = "workitems/12343456/issue";
+        Response result = client.target(baseUrl).path(workItemWithAssignedIssuePath).request().header(AUTH, AUTH_CODE)
+                .put(Entity.json("{\"id\": 123541,\"description\": \"some new issue description\"}"));
+        assertEquals(Status.NO_CONTENT, result.getStatusInfo());
+    }
+
+    @Test
+    public void deleteAssignedIssueShouldReturnNoContent() {
+        String workItemWithIssueToBeDeleted = "workitems/52378456/issue";
+        Response result = client.target(baseUrl).path(workItemWithIssueToBeDeleted).request().header(AUTH, AUTH_CODE)
                 .delete();
         assertEquals(Status.NO_CONTENT, result.getStatusInfo());
     }
