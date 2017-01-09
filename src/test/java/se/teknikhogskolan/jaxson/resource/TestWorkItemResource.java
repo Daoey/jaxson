@@ -114,6 +114,55 @@ public class TestWorkItemResource {
     }
 
     @Test
+    public void getWorkItemsWithAConflictingParameterCombinationShouldReturnConflict() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("description", "some description")
+                .queryParam("status", "some status").request().header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.CONFLICT, result.getStatusInfo());
+    }
+
+    @Test
+    public void getWorkItemsWithIncompleteParameterCombinationShouldReturnIncomplete() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("createdBefore", "2017-12-12").request()
+                .header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.BAD_REQUEST, result.getStatusInfo());
+    }
+
+    @Test
+    public void getWorkItemsByCreationDateShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("createdBefore", "2017-12-12")
+                .queryParam("createdAfter", "2015-12-12").request().header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
+    public void getWorkItemsByCompletionDateShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("completedBefore", "2017-12-12")
+                .queryParam("completedAfter", "2015-12-12").request().header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
+    public void getWorkItemsByStatusShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("status", "UNSTARTED").request()
+                .header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
+    public void getWorkItemsByDescriptionShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("description", "test").request()
+                .header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+    
+    @Test
+    public void getWorkItemsWithIssueShouldReturnOk() {
+        Response result = client.target(baseUrl).path(WORKITEMS).queryParam("hasIssue", "true").request()
+                .header(AUTH, AUTH_CODE).get();
+        assertEquals(Status.OK, result.getStatusInfo());
+    }
+
+    @Test
     public void createAndAssignIssueShouldReturnCreated() {
         Response result = client.target(baseUrl).path(ISSUE_ASSIGNMENT).request().header(AUTH, AUTH_CODE)
                 .post(Entity.json("{\"description\": \"some issue description\"}"));
