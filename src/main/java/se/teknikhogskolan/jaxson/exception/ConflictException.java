@@ -1,7 +1,6 @@
 package se.teknikhogskolan.jaxson.exception;
 
 import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Response;
