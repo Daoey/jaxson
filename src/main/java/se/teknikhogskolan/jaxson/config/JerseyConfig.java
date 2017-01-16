@@ -11,6 +11,7 @@ import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotAllowedExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotFoundExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.RuntimeExceptionMapper;
+import se.teknikhogskolan.jaxson.resource.implementation.SecurityResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.WorkItemResourceImpl;
@@ -24,6 +25,7 @@ public final class JerseyConfig extends ResourceConfig {
         register(TeamResourceImpl.class);
         register(UserResourceImpl.class);
         register(WorkItemResourceImpl.class);
+        register(SecurityResourceImpl.class);
 
         register(AuthorizationRequestFilter.class);
 

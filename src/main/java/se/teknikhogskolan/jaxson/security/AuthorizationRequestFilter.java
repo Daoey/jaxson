@@ -11,6 +11,8 @@ import se.teknikhogskolan.jaxson.exception.ErrorMessage;
 
 public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
+    //TODO User tokens?!
+
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
 
