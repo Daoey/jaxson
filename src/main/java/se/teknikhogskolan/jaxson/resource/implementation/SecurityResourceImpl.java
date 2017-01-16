@@ -7,7 +7,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import service.UserService;
+import se.teknikhogskolan.springcasemanagement.service.UserService;
 
 @Path("/")
 @Consumes(MediaType.APPLICATION_JSON)
