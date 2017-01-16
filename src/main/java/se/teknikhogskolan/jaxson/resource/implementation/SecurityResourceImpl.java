@@ -7,22 +7,23 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.MediaType;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import se.teknikhogskolan.springcasemanagement.service.UserService;
+
+import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
 
 @Path("/")
 @Consumes(MediaType.APPLICATION_JSON)
 @Produces(MediaType.APPLICATION_JSON)
 public class SecurityResourceImpl {
 
-    private UserService userService;
+    private SecurityUserService userService;
 
     @Autowired
-    public SecurityResourceImpl(UserService userService) {
+    public SecurityResourceImpl(SecurityUserService userService) {
         this.userService = userService;
     }
 
     @POST
     public void createUser(){
-
     }
+    
 }
