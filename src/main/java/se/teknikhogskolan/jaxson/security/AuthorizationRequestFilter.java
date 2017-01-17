@@ -24,8 +24,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
         // Return if security resource
         UriInfo uriInfo = requestContext.getUriInfo();
-        System.out.println(uriInfo.getPath());
-        if ("".equals(uriInfo.getPath())) {
+        if ("register".equals(uriInfo.getPath()) || "login".equals(uriInfo.getPath())) {
             return;
         }
 
