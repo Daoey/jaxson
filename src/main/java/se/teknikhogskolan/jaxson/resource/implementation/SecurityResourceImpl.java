@@ -39,27 +39,26 @@ public final class SecurityResourceImpl implements SecurityResource {
                 + " JSON body containing username and password.");
     }
 
+    @Override
+    public Response authenticateUser(Credentials credentials) {
+        if (noNullValues(credentials)) {
+            // securityUserService.get(credentials.getUsername(), credentials.getPassword());
+            Optional<SecurityUser> securityUser = null;
+            if (securityUser.isPresent()) {
+                //TODO refresh or create a new token?
+                /*securityUserService.createSecurityUserToken(securityUser.get().getId(),
+                    LocalDate.now(), LocalDateTime.now().plusMinutes(30));*/
+                String token = "Token";
+                return Response.ok(token).build();
+            }
+            throw new IllegalArgumentException("");
+        }
+        throw new IllegalArgumentException("Could not authenticate security user without"
+                + " JSON body containing username and password.");
+    }
+
     private boolean noNullValues(Credentials credentials) {
         return credentials.getUsername() != null
                 && credentials.getPassword() != null;
-    }
-
-    @Override
-    public Response authenticateUser(Credentials credentials) {
-        // securityUserService.get(credentials.getUsername(), credentials.getPassword());
-        Optional<SecurityUser> securityUser = null;
-        if (securityUser.isPresent()) {
-            /*securityUserService.createSecurityUserToken(securityUser.get().getId(),
-                    LocalDate.now(), LocalDateTime.now().plusMinutes(30));*/
-            String token = "Token";
-            return Response.ok(token).build();
-        }
-        throw new IllegalArgumentException("");
-    }
-
-    @Override
-    public Response refreshToken(String token) {
-        String newToken = "New Token"; //securityUserService.updateToken(token);
-        return Response.ok(newToken).build();
     }
 }
