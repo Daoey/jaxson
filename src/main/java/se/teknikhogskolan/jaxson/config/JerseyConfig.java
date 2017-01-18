@@ -9,6 +9,7 @@ import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.IllegalArgumentExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotAllowedExceptionMapper;
+import se.teknikhogskolan.jaxson.exception.NotAuthorizedExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotFoundExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.RuntimeExceptionMapper;
 import se.teknikhogskolan.jaxson.resource.implementation.SecurityResourceImpl;
@@ -35,5 +36,6 @@ public final class JerseyConfig extends ResourceConfig {
         register(NotAllowedExceptionMapper.class);
         register(IllegalArgumentExceptionMapper.class);
         register(RuntimeExceptionMapper.class);
+        register(NotAuthorizedExceptionMapper.class);
     }
 }

@@ -1,18 +1,18 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import java.io.UnsupportedEncodingException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.Optional;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.ws.rs.core.Response;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
 import se.teknikhogskolan.jaxson.model.Credentials;
+import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
 import se.teknikhogskolan.springcasemanagement.model.SecurityUser;
 import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
+import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseException;
 
 public final class SecurityResourceImpl implements SecurityResource {
 
@@ -25,40 +25,23 @@ public final class SecurityResourceImpl implements SecurityResource {
 
     @Override
     public Response createUser(Credentials credentials) {
-        if (noNullValues(credentials)) {
-            //securityUserService.create(credentials.getUsername(), credentials.getPassword());
-            Optional<SecurityUser> securityUser = null;
-            if (securityUser.isPresent()) {
-                /*securityUserService.createSecurityUserToken(securityUser.get().getId(),
-                        LocalDate.now(), LocalDateTime.now().plusMinutes(30));*/
-                String token = "Token";
-                return Response.ok(token).build();
-            }
+        SecurityUser securityUser = securityUserService.create(credentials.getUsername(), credentials.getPassword());
+        Token token = getTokenFromSecurityUser(securityUser);
+        return Response.ok(token).build();
+    }
+
+    private Token getTokenFromSecurityUser(SecurityUser securityUser) {
+        Iterator entries = securityUser.getTokensExpiration().entrySet().iterator();
+        if (entries.hasNext()) {
+            Map.Entry thisEntry = (Map.Entry) entries.next();
+            return new Token(thisEntry.getKey().toString(), thisEntry.getValue().toString());
         }
-        throw new IllegalArgumentException("Could not create security user without"
-                + " JSON body containing username and password.");
+        throw new DatabaseException();
     }
 
     @Override
     public Response authenticateUser(Credentials credentials) {
-        if (noNullValues(credentials)) {
-            // securityUserService.get(credentials.getUsername(), credentials.getPassword());
-            Optional<SecurityUser> securityUser = null;
-            if (securityUser.isPresent()) {
-                //TODO refresh or create a new token?
-                /*securityUserService.createSecurityUserToken(securityUser.get().getId(),
-                    LocalDate.now(), LocalDateTime.now().plusMinutes(30));*/
-                String token = "Token";
-                return Response.ok(token).build();
-            }
-            throw new IllegalArgumentException("");
-        }
-        throw new IllegalArgumentException("Could not authenticate security user without"
-                + " JSON body containing username and password.");
-    }
-
-    private boolean noNullValues(Credentials credentials) {
-        return credentials.getUsername() != null
-                && credentials.getPassword() != null;
+        String token = securityUserService.createTokenFor(credentials.getUsername(), credentials.getPassword());
+        return Response.ok(token).build();
     }
 }
