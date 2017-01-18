@@ -16,6 +16,6 @@ public final class NotAuthorizedExceptionMapper implements ExceptionMapper<NotAu
         return Response.status(UNAUTHORIZED).entity(new ErrorMessage(
                 UNAUTHORIZED.getStatusCode(),
                 UNAUTHORIZED.toString(),
-                "The username and password did not match")).build();
+                exception.getMessage())).build();
     }
 }
