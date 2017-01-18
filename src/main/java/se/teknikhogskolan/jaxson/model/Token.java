@@ -3,18 +3,18 @@ package se.teknikhogskolan.jaxson.model;
 public final class Token {
 
     private final String token;
-    private final String expirationDate;
+    private final String expirationTime;
 
-    public Token(String token, String expirationDate) {
+    public Token(String token, String expirationTime) {
         this.token = token;
-        this.expirationDate = expirationDate;
+        this.expirationTime = expirationTime;
     }
 
     public String getToken() {
         return token;
     }
 
-    public String getExpirationDate() {
-        return expirationDate;
+    public String getExpirationTime() {
+        return expirationTime;
     }
 }
