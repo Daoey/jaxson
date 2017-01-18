@@ -1,7 +1,6 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import java.util.Iterator;
-import java.util.Map;
+import java.time.LocalDateTime;
 
 import javax.ws.rs.core.Response;
 
@@ -10,9 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
-import se.teknikhogskolan.springcasemanagement.model.SecurityUser;
 import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
-import se.teknikhogskolan.springcasemanagement.service.exception.DatabaseException;
 
 public final class SecurityResourceImpl implements SecurityResource {
 
@@ -25,23 +22,22 @@ public final class SecurityResourceImpl implements SecurityResource {
 
     @Override
     public Response createUser(Credentials credentials) {
-        SecurityUser securityUser = securityUserService.create(credentials.getUsername(), credentials.getPassword());
-        Token token = getTokenFromSecurityUser(securityUser);
-        return Response.ok(token).build();
-    }
-
-    private Token getTokenFromSecurityUser(SecurityUser securityUser) {
-        Iterator entries = securityUser.getTokensExpiration().entrySet().iterator();
-        if (entries.hasNext()) {
-            Map.Entry thisEntry = (Map.Entry) entries.next();
-            return new Token(thisEntry.getKey().toString(), thisEntry.getValue().toString());
-        }
-        throw new DatabaseException();
+        securityUserService.create(credentials.getUsername(), credentials.getPassword());
+        return Response.ok(createTokenWithCredentials(credentials)).build();
     }
 
     @Override
     public Response authenticateUser(Credentials credentials) {
+        return Response.ok(createTokenWithCredentials(credentials)).build();
+    }
+
+    private Token createTokenWithCredentials(Credentials credentials) {
         String token = securityUserService.createTokenFor(credentials.getUsername(), credentials.getPassword());
-        return Response.ok(token).build();
+        int expirationTime = getSecondsLeft(securityUserService.getExpiration(token));
+        return new Token(token, expirationTime);
+    }
+
+    private int getSecondsLeft(LocalDateTime created) {
+        return LocalDateTime.now().compareTo(created);
     }
 }

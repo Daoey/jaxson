@@ -3,9 +3,9 @@ package se.teknikhogskolan.jaxson.model;
 public final class Token {
 
     private final String token;
-    private final String expirationTime;
+    private final int expirationTime;
 
-    public Token(String token, String expirationTime) {
+    public Token(String token, int expirationTime) {
         this.token = token;
         this.expirationTime = expirationTime;
     }
@@ -14,7 +14,7 @@ public final class Token {
         return token;
     }
 
-    public String getExpirationTime() {
+    public int getExpirationTime() {
         return expirationTime;
     }
 }
