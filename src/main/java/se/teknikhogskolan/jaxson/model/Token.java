@@ -10,8 +10,7 @@ public final class Token {
         this.expirationTime = expirationTime;
     }
 
-    public Token() {
-    }
+    protected Token(){}
 
     public String getToken() {
         return token;
