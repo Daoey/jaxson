@@ -10,10 +10,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.GenericType;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.json.JSONObject;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -25,6 +28,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
+import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.TeamDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
 
@@ -37,7 +41,6 @@ import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureCon
 public class TestAuthorizationRequestFilter {
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String AUTHORIZATION_CODE = "Basic cm9vdDpzZWNyZXQ=";
     private static Client client;
     @LocalServerPort
     private int randomPort;
@@ -46,6 +49,7 @@ public class TestAuthorizationRequestFilter {
     // Data from insert_team.sql
     private final Long turtlesTeamId = 2001L;
     private final Long clanTeamId = 2002L;
+    private String token;
 
     @BeforeClass
     public static void initialize() {
@@ -57,6 +61,12 @@ public class TestAuthorizationRequestFilter {
         String targetUrl = String.format("http://localhost:%d/jaxson/", randomPort);
         String resource = "teams";
         teamWebTarget = client.target(targetUrl).path(resource);
+        
+        Response result = client.target(targetUrl).path("register").request()
+                .post(Entity.entity(new Credentials("username", "password"), MediaType.APPLICATION_JSON));
+        String responseAsString = result.readEntity(String.class);
+        JSONObject jsonObj = new JSONObject(responseAsString);
+        token = "Bearer " + jsonObj.getString("token");
     }
 
     @Test
@@ -67,7 +77,7 @@ public class TestAuthorizationRequestFilter {
 
     @Test
     public void canGetTeamsWhenAuthorized() {
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+        Response response = teamWebTarget.request().header(AUTHORIZATION, token).get();
         assertEquals(OK, response.getStatusInfo());
         List<TeamDto> result = response.readEntity(new GenericType<List<TeamDto>>(){});
         List<Long> teamIdsInDatabase = result.stream().map(TeamDto::getId).collect(Collectors.toList());

@@ -34,6 +34,12 @@ public final class SecurityResourceImpl implements SecurityResource {
     }
 
     private Token createTokenWithCredentials(Credentials credentials) {
+        if (credentials.getPassword() == null) {
+            throw new IllegalArgumentException("Password can't be null");
+        }
+        if (credentials.getUsername() == null) {
+            throw new IllegalArgumentException("Username can't be null");
+        }
         String token = securityUserService.createTokenFor(credentials.getUsername(), credentials.getPassword());
         long expirationTime = getSecondsLeft(securityUserService.getExpiration(token));
         return new Token(token, expirationTime);
