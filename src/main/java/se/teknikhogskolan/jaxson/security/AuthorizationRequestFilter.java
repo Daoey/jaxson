@@ -18,7 +18,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-
+        
         // Return if security resource
         UriInfo uriInfo = requestContext.getUriInfo();
         if ("register".equals(uriInfo.getPath()) || "login".equals(uriInfo.getPath())) {
@@ -34,27 +34,6 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
         securityUserService.verify(token);
-
-        // validateToken(token, requestContext);
     }
 
-    // private void validateToken(String token, ContainerRequestContext
-    // requestContext) {
-    // // Check if it was issued by the server and if it's not expired
-    // SecurityUser securityUser = securityUserService.getExpiration(token);
-    //
-    // if (securityUser == null) {
-    // throw new NotAuthorizedException("Not authorized");
-    // }
-    //
-    // DateTimeFormatter formatter =
-    // DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS");
-    // LocalDateTime date =
-    // LocalDateTime.parse(securityUser.getTokensExpiration().get(token),
-    // formatter);
-    //
-    // if (date.isBefore(LocalDateTime.now())) {
-    // throw new NotAuthorizedException("Login session has expired");
-    // }
-    // }
 }
