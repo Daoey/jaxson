@@ -1,5 +1,7 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
+import static java.time.temporal.ChronoUnit.SECONDS;
+
 import java.time.LocalDateTime;
 
 import javax.ws.rs.core.Response;
@@ -33,11 +35,11 @@ public final class SecurityResourceImpl implements SecurityResource {
 
     private Token createTokenWithCredentials(Credentials credentials) {
         String token = securityUserService.createTokenFor(credentials.getUsername(), credentials.getPassword());
-        int expirationTime = getSecondsLeft(securityUserService.getExpiration(token));
+        long expirationTime = getSecondsLeft(securityUserService.getExpiration(token));
         return new Token(token, expirationTime);
     }
 
-    private int getSecondsLeft(LocalDateTime created) {
-        return LocalDateTime.now().compareTo(created);
+    private long getSecondsLeft(LocalDateTime created) {
+        return SECONDS.between(LocalDateTime.now(), created);
     }
 }

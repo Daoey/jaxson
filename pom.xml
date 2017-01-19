@@ -28,7 +28,7 @@
 		<dependency>
 			<groupId>se.teknikhogskolan.springcasemanagement</groupId>
 			<artifactId>spring-case-management</artifactId>
-			<version>0.2.7</version>
+			<version>0.3.0</version>
 		</dependency>
 
 		<dependency>
