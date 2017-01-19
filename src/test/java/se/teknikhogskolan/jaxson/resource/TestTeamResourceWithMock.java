@@ -1,9 +1,9 @@
 package se.teknikhogskolan.jaxson.resource;
 
-import static javax.ws.rs.core.Response.Status.OK;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.http.HttpMethod.GET;
 import static org.springframework.http.HttpMethod.POST;
@@ -17,9 +17,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 
 import org.json.JSONObject;
 import org.junit.Before;
@@ -38,7 +36,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.ClientHttpResponse;
-import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.ResponseErrorHandler;
@@ -51,6 +48,7 @@ import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
+import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
@@ -82,12 +80,15 @@ public class TestTeamResourceWithMock {
     @MockBean
     private WorkItemService workItemService;
 
+    @MockBean
+    private SecurityUserService securityUserService;
+
     @LocalServerPort
     private int randomPort;
 
     private RestTemplate restTemplate;
     private final String auth = "Authorization";
-    private final String authCode = "Basic cm9vdDpzZWNyZXQ=";
+    private final String token = "Bearer cm9vdDpzZWNyZXQ=";
     private final String teamResource = "/teams/";
     private final String teamName = "The mockers";
     private final Team team = new Team(teamName);
@@ -126,6 +127,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void canGetAllTeams() {
+        doNothing().when(securityUserService).verify(token);
         List<Team> teams = new ArrayList<>();
         teams.add(mockedTeam);
         given(teamService.getAll()).willReturn(teams);
@@ -136,6 +138,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void getAllTeamsShouldReturnEmptyListIfNoTeamExist() {
+        doNothing().when(securityUserService).verify(token);
         given(teamService.getAll()).willReturn(new ArrayList<>());
         ResponseEntity<TeamDto[]> response = restTemplate
                 .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
@@ -144,6 +147,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void getAllTeamsShouldReturnEmptyArrayIfNoTeamsExist() {
+        doNothing().when(securityUserService).verify(token);
         given(teamService.getAll()).willReturn(new ArrayList<>());
         ResponseEntity<Collection> response = restTemplate
                 .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
@@ -152,6 +156,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void canUpdateTeam() {
+        doNothing().when(securityUserService).verify(token);
         String oldName = "Old team name";
         given(teamService.getById(teamId)).willReturn(mockedTeam);
         when(mockedTeam.isActive()).thenReturn(true);
@@ -169,6 +174,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void notAllowedToChangeTeamId() {
+        doNothing().when(securityUserService).verify(token);
         given(teamService.getById(teamId)).willReturn(mockedTeam);
         when(mockedTeam.isActive()).thenReturn(false);
         Long oldId = 16546312L;
@@ -191,6 +197,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void canAddUserToTeamUsingUsernumber() {
+        doNothing().when(securityUserService).verify(token);
         Long usernumber = 1001L;
         Long userId = 64648949L;
         given(userService.getByUserNumber(usernumber)).willReturn(mockedUser);
@@ -208,6 +215,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void canAddUserToTeamUsingUserId() {
+        doNothing().when(securityUserService).verify(token);
         Long userId = 1001L;
         given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
 
@@ -223,6 +231,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void createTeamWithUsersShouldReturnForbidden() throws URISyntaxException {
+        doNothing().when(securityUserService).verify(token);
         exception.expect(HttpClientErrorException.class);
         exception.expectMessage("403 null");
 
@@ -237,6 +246,7 @@ public class TestTeamResourceWithMock {
 
     @Test
     public void createTeamPassingTeamIdShouldReturnForbidden() throws URISyntaxException {
+        doNothing().when(securityUserService).verify(token);
         exception.expect(HttpClientErrorException.class);
         exception.expectMessage("403 null");
 
@@ -250,6 +260,7 @@ public class TestTeamResourceWithMock {
     @Test
     public void createTeam() throws URISyntaxException {
         given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
+        doNothing().when(securityUserService).verify(token);
         when(mockedTeam.getId()).thenReturn(teamId);
 
         JSONObject teamToCreate = new JSONObject();
@@ -267,6 +278,7 @@ public class TestTeamResourceWithMock {
     @Test
     public void getTeamById() throws URISyntaxException {
         given(teamService.getById(teamId)).willReturn(team);
+        doNothing().when(securityUserService).verify(token);
         ResponseEntity<TeamDto> response = restTemplate.exchange(
                 createUri(teamResource + teamId), GET, createHttpEntity(null, null), TeamDto.class);
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -281,7 +293,7 @@ public class TestTeamResourceWithMock {
     private HttpEntity<?> createHttpEntity(JSONObject body, Map<String, Object> headParameters) {
         HttpHeaders headers = new HttpHeaders();
         if (null != headParameters) headParameters.forEach((key, value) -> headers.set(key, value.toString()));
-        headers.set(auth, authCode);
+        headers.set(auth, token);
         headers.set("Accept", MediaType.APPLICATION_JSON);
         headers.set("Content-Type", MediaType.APPLICATION_JSON);
         return (null == body) ? new HttpEntity<>(headers) : new HttpEntity<>(body.toString(), headers);
