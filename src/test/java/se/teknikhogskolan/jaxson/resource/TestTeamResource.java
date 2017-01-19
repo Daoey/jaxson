@@ -36,7 +36,9 @@ import org.springframework.test.context.jdbc.SqlGroup;
 import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.exception.ErrorMessage;
+import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.TeamDto;
+import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
@@ -50,13 +52,15 @@ import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureCon
 public class TestTeamResource {
 
     private static final String AUTHORIZATION = "Authorization";
-    private static final String AUTHORIZATION_CODE = "Basic cm9vdDpzZWNyZXQ=";
+    private static final Credentials CREDENTIALS = new Credentials("secure_user", "password");
     private static Client client;
     @LocalServerPort private int randomPort;
     private WebTarget teamWebTarget;
     private WebTarget userWebTarget;
+    private WebTarget registerSecurityUserWebTarget;
 
     // Data from insert_team.sql
+    private static String TOKEN;
     private final Long turtlesTeamId = 2001L;
     private final Long clanTeamId = 2002L;
     private UserDto splinter;
@@ -77,26 +81,30 @@ public class TestTeamResource {
         String userResource = "users";
         teamWebTarget = client.target(targetUrl).path(teamResource);
         userWebTarget = client.target(targetUrl).path(userResource);
+        registerSecurityUserWebTarget = client.target(targetUrl).path("register");
+        
+        TOKEN = "Bearer " + registerSecurityUserWebTarget.request()
+                .post(Entity.entity(CREDENTIALS, MediaType.APPLICATION_JSON)).readEntity(Token.class).getToken();
 
         String inactiveUserId = "1010";
         inactiveUser = userWebTarget.path(inactiveUserId).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
+                .header(AUTHORIZATION, TOKEN).get().readEntity(UserDto.class);
         String splinterId = "1001";
         splinter = userWebTarget.path(splinterId).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get().readEntity(UserDto.class);
+                .header(AUTHORIZATION, TOKEN).get().readEntity(UserDto.class);
         turtles = teamWebTarget.path(turtlesTeamId.toString()).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get(TeamDto.class);
-        footClan = teamWebTarget.path(clanTeamId.toString()).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN).get(TeamDto.class);
+        footClan = teamWebTarget.path(clanTeamId.toString()).request().header(AUTHORIZATION, TOKEN)
                 .get(TeamDto.class);
         String inactiveTeamId = "2003";
-        inactiveTeam = teamWebTarget.path(inactiveTeamId).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        inactiveTeam = teamWebTarget.path(inactiveTeamId).request().header(AUTHORIZATION, TOKEN)
                 .get(TeamDto.class);
     }
 
     @Test
     public void getUsersFromTeamWithoutUsersShouldReturnEmptyList() {
         Response response = teamWebTarget.path(footClan.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<UserDto> result = response.readEntity(new GenericType<List<UserDto>>(){});
         assertTrue(result.isEmpty());
@@ -106,7 +114,7 @@ public class TestTeamResource {
     public void canGetUsersFromInactiveTeam() {
         assertFalse(inactiveTeam.isActive());
         Response response = teamWebTarget.path(inactiveTeam.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<UserDto> result = response.readEntity(new GenericType<List<UserDto>>(){});
         assertEquals(1, result.size());
@@ -115,7 +123,7 @@ public class TestTeamResource {
     @Test
     public void canGetUsersFromTeam() {
         Response response = teamWebTarget.path(turtles.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<UserDto> result = response.readEntity(new GenericType<List<UserDto>>(){});
         List<String> firstNamesInResult = result.stream().map(UserDto::getFirstName).collect(Collectors.toList());
@@ -128,7 +136,7 @@ public class TestTeamResource {
 
     @Test
     public void canGetAllTeams() {
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+        Response response = teamWebTarget.request().header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<TeamDto> result = response.readEntity(new GenericType<List<TeamDto>>(){});
         assertTrue(result.contains(turtles));
@@ -138,18 +146,18 @@ public class TestTeamResource {
     @Test
     public void createTeamReturnsLocation() {
         TeamDto teamDto = new TeamDto("Testing Team");
-        URI teamInDbLocation = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        URI teamInDbLocation = teamWebTarget.request().header(AUTHORIZATION, TOKEN)
                 .post(Entity.entity(teamDto, MediaType.APPLICATION_JSON)).getLocation();
         assertNotNull(teamInDbLocation);
 
-        Response response = client.target(teamInDbLocation).request().header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+        Response response = client.target(teamInDbLocation).request().header(AUTHORIZATION, TOKEN).get();
         TeamDto result = response.readEntity(TeamDto.class);
         assertEquals(teamDto, result);
     }
 
     @Test
     public void createAlreadyPersistedTeamShouldReturnForbidden() {
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        Response response = teamWebTarget.request().header(AUTHORIZATION, TOKEN)
                 .post(Entity.entity(turtles, MediaType.APPLICATION_JSON));
         assertEquals(FORBIDDEN, response.getStatusInfo());
     }
@@ -157,7 +165,7 @@ public class TestTeamResource {
     @Test
     public void creatingSecondTeamWithSameNameShouldReturnErrorMessage() {
         String turtlesTeamName = turtles.getName();
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        Response response = teamWebTarget.request().header(AUTHORIZATION, TOKEN)
                 .post(Entity.entity(new TeamDto(turtlesTeamName), MediaType.APPLICATION_JSON));
 
         assertEquals(PRECONDITION_FAILED, response.getStatusInfo());
@@ -172,10 +180,10 @@ public class TestTeamResource {
     @Test
     public void canCreateInactiveTeam() {
         TeamDto inactiveTeam = new TeamDto("New Inactive Team", new ArrayList<>(), false);
-        Response response = teamWebTarget.request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        Response response = teamWebTarget.request().header(AUTHORIZATION, TOKEN)
                 .post(Entity.entity(inactiveTeam, MediaType.APPLICATION_JSON));
         assertEquals(CREATED, response.getStatusInfo());
-        TeamDto result = client.target(response.getLocation()).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        TeamDto result = client.target(response.getLocation()).request().header(AUTHORIZATION, TOKEN)
                 .get().readEntity(TeamDto.class);
         assertFalse(result.isActive());
     }
@@ -183,7 +191,7 @@ public class TestTeamResource {
     @Test
     public void getNotExistingTeamShouldReturn404() {
         final String nonExistingTeam = "8489584656";
-        Response response = teamWebTarget.path(nonExistingTeam).request().header(AUTHORIZATION, AUTHORIZATION_CODE)
+        Response response = teamWebTarget.path(nonExistingTeam).request().header(AUTHORIZATION, TOKEN)
                 .get();
         assertEquals(NOT_FOUND, response.getStatusInfo());
     }
@@ -191,7 +199,7 @@ public class TestTeamResource {
     @Test
     public void canGetTeamById() {
         Response response = teamWebTarget.path(turtlesTeamId.toString()).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         TeamDto result = response.readEntity(TeamDto.class);
         assertEquals(turtles.getName(), result.getName());
@@ -200,7 +208,7 @@ public class TestTeamResource {
     @Test
     public void getWorkItemsFromTeamWithoutWorkItemsShouldReturnEmptyList() {
         Response response = teamWebTarget.path(footClan.getId().toString() + "/workitems").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<WorkItemDto> result = response.readEntity(new GenericType<List<WorkItemDto>>(){});
         assertTrue(result.isEmpty());
@@ -209,7 +217,7 @@ public class TestTeamResource {
     @Test
     public void canGetWorkItemsFromInactiveTeam() {
         Response response = teamWebTarget.path(inactiveTeam.getId().toString() + "/workitems").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE).get();
+                .header(AUTHORIZATION, TOKEN).get();
         assertEquals(OK, response.getStatusInfo());
         List<WorkItemDto> result = response.readEntity(new GenericType<List<WorkItemDto>>(){});
         assertEquals(1, result.size());
@@ -218,7 +226,7 @@ public class TestTeamResource {
     @Test
     public void updateTeamNameToOccupiedNameShouldReturnErrorMessage() {
         Response response = teamWebTarget.path(clanTeamId.toString()).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN)
                 .put(Entity.entity(new TeamDto("TMNT"), MediaType.APPLICATION_JSON_TYPE));
         assertEquals(PRECONDITION_FAILED, response.getStatusInfo());
         ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
@@ -231,7 +239,7 @@ public class TestTeamResource {
     @Test
     public void updatingInactiveTeamShouldReturnErrorMessage() {
         Response response = teamWebTarget.path(inactiveTeam.getId().toString()).request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN)
                 .put(Entity.entity(new TeamDto("New name"), MediaType.APPLICATION_JSON_TYPE));
         assertEquals(FORBIDDEN, response.getStatusInfo());
         ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
@@ -244,7 +252,7 @@ public class TestTeamResource {
     @Test
     public void addingInactiveUserToTeamShouldReturnErrorMessage() {
         Response response = teamWebTarget.path(turtles.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN)
                 .put(Entity.entity(inactiveUser, MediaType.APPLICATION_JSON_TYPE));
         assertEquals(PRECONDITION_FAILED, response.getStatusInfo());
         ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
@@ -258,7 +266,7 @@ public class TestTeamResource {
     @Test
     public void addingUserToInactiveTeamShouldReturnErrorMessage() {
         Response response = teamWebTarget.path(inactiveTeam.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN)
                 .put(Entity.entity(splinter, MediaType.APPLICATION_JSON_TYPE));
         assertEquals(PRECONDITION_FAILED, response.getStatusInfo());
         ErrorMessage errorMessage = response.readEntity(ErrorMessage.class);
@@ -272,7 +280,7 @@ public class TestTeamResource {
     @Test
     public void movingUserFromATeamToAnotherShouldReturnNoContent() {
         Response response = teamWebTarget.path(footClan.getId().toString() + "/users").request()
-                .header(AUTHORIZATION, AUTHORIZATION_CODE)
+                .header(AUTHORIZATION, TOKEN)
                 .put(Entity.entity(splinter, MediaType.APPLICATION_JSON_TYPE));
         assertEquals(NO_CONTENT, response.getStatusInfo());
     }
