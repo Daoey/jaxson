@@ -1,7 +1,9 @@
 package se.teknikhogskolan.jaxson.resource;
 
 import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.NOT_FOUND;
 import static javax.ws.rs.core.Response.Status.OK;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -30,7 +32,7 @@ import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureCon
 @SpringBootTest(classes = JaxsonApplication.class, webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ContextConfiguration(classes = {HsqlInfrastructureConfig.class})
 @SqlGroup({@Sql(scripts = "hsql_clean_tables.sql", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)})
-public class TestSecurityResource {
+public final class TestSecurityResource {
 
     private static Client client;
     private String baseUrl;
@@ -52,49 +54,110 @@ public class TestSecurityResource {
 
     @Test
     public void canRegisterUser() {
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
+        Response response = registerUser();
         assertEquals(OK, response.getStatusInfo());
     }
 
     @Test
     public void registerUserShouldReturnToken() {
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
+        Response response = registerUser();
         Token token = response.readEntity(Token.class);
         assertNotNull(token.getToken());
     }
 
     @Test
     public void registerUserShouldReturnExpirationTime() {
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
+        Response response = registerUser();
         Token token = response.readEntity(Token.class);
         assertNotNull(token.getExpirationTime());
     }
 
     @Test
     public void shouldReturnBadRequestIfUsernameAlreadyExistWhenRegisterUser() {
-        client.target(baseUrl).path("register").request()
-                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
+        registerUser();
+        Response response = registerUser();
         assertEquals(BAD_REQUEST, response.getStatusInfo());
     }
 
     @Test
-    public void registerUserWithoutPasswordShouldReturnBadRequest() throws Exception {
-        Credentials noPassword = new Credentials("username", null);
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(noPassword, MediaType.APPLICATION_JSON));
+    public void registerUserWithoutPasswordShouldReturnBadRequest() {
+        this.credentials = new Credentials("username", null);
+        Response response = registerUser();
         assertEquals(BAD_REQUEST, response.getStatusInfo());
     }
 
     @Test
-    public void registerUserWithoutUsernameShouldReturnBadRequest() throws Exception {
-        Credentials noUsername = new Credentials(null, "password");
-        Response response = client.target(baseUrl).path("register").request()
-                .post(Entity.entity(noUsername, MediaType.APPLICATION_JSON));
+    public void registerUserWithoutUsernameShouldReturnBadRequest() {
+        this.credentials = new Credentials(null, "password");
+        Response response = registerUser();
         assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    @Test
+    public void canLogin() {
+        registerUser();
+        Response response = loginUser();
+        assertEquals(OK, response.getStatusInfo());
+    }
+
+    @Test
+    public void loginUserShouldReturnToken() {
+        registerUser();
+        Response response = loginUser();
+        Token token = response.readEntity(Token.class);
+        assertNotNull(token.getToken());
+    }
+
+    @Test
+    public void loginUserShouldReturnExpirationTime() {
+        registerUser();
+        Response response = loginUser();
+        Token token = response.readEntity(Token.class);
+        assertNotNull(token.getExpirationTime());
+    }
+
+    @Test
+    public void shouldReturnBadRequestIfUsernameDoNotExist() {
+        registerUser();
+        this.credentials = new Credentials("wrong", "wrong");
+        Response response = loginUser();
+        assertEquals(NOT_FOUND, response.getStatusInfo());
+    }
+
+    @Test
+    public void shouldReturnUnAuthorizedIfPasswordIsWrong() {
+        registerUser();
+        String correctUsername = credentials.getUsername();
+        this.credentials = new Credentials(correctUsername, "Wrong");
+        Response response = loginUser();
+        assertEquals(UNAUTHORIZED, response.getStatusInfo());
+    }
+
+    @Test
+    public void loginShouldReturnBadRequestIfPasswordIsNull() {
+        registerUser();
+        String correctUsername = credentials.getUsername();
+        this.credentials = new Credentials(correctUsername, null);
+        Response response = loginUser();
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    @Test
+    public void loginShouldReturnBadRequestIfUsernameIsNull() {
+        registerUser();
+        String correctPassword = credentials.getPassword();
+        this.credentials = new Credentials(null, correctPassword);
+        Response response = loginUser();
+        assertEquals(BAD_REQUEST, response.getStatusInfo());
+    }
+
+    private Response registerUser() {
+        return client.target(baseUrl).path("register").request()
+                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
+    }
+
+    private Response loginUser() {
+        return client.target(baseUrl).path("login").request()
+                .post(Entity.entity(credentials, MediaType.APPLICATION_JSON));
     }
 }
