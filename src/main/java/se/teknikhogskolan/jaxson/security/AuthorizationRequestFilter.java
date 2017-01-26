@@ -34,6 +34,8 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
         String token = authorizationHeader.substring("Bearer".length()).trim();
 
         securityUserService.verify(token);
+
+        securityUserService.renewExpiration(token);
     }
 
 }
