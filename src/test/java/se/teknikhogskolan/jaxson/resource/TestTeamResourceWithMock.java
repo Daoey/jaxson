@@ -48,7 +48,7 @@ import se.teknikhogskolan.jaxson.model.WorkItemDto;
 import se.teknikhogskolan.springcasemanagement.model.Team;
 import se.teknikhogskolan.springcasemanagement.model.User;
 import se.teknikhogskolan.springcasemanagement.model.WorkItem;
-import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
+import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
 import se.teknikhogskolan.springcasemanagement.service.TeamService;
 import se.teknikhogskolan.springcasemanagement.service.UserService;
 import se.teknikhogskolan.springcasemanagement.service.WorkItemService;
@@ -81,7 +81,7 @@ public class TestTeamResourceWithMock {
     private WorkItemService workItemService;
 
     @MockBean
-    private SecurityUserService securityUserService;
+    private SecureUserService secureUserService;
 
     @LocalServerPort
     private int randomPort;
@@ -125,165 +125,165 @@ public class TestTeamResourceWithMock {
         assertEquals(1, response.getBody().length);
     }
 
-    @Test
-    public void canGetAllTeams() {
-        doNothing().when(securityUserService).verify(token);
-        List<Team> teams = new ArrayList<>();
-        teams.add(mockedTeam);
-        given(teamService.getAll()).willReturn(teams);
-        ResponseEntity<TeamDto[]> response = restTemplate
-                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
-        assertEquals(1, response.getBody().length);
-    }
-
-    @Test
-    public void getAllTeamsShouldReturnEmptyListIfNoTeamExist() {
-        doNothing().when(securityUserService).verify(token);
-        given(teamService.getAll()).willReturn(new ArrayList<>());
-        ResponseEntity<TeamDto[]> response = restTemplate
-                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
-        assertEquals(0, response.getBody().length);
-    }
-
-    @Test
-    public void getAllTeamsShouldReturnEmptyArrayIfNoTeamsExist() {
-        doNothing().when(securityUserService).verify(token);
-        given(teamService.getAll()).willReturn(new ArrayList<>());
-        ResponseEntity<Collection> response = restTemplate
-                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
-        assertTrue(response.getBody().isEmpty());
-    }
-
-    @Test
-    public void canUpdateTeam() {
-        doNothing().when(securityUserService).verify(token);
-        String oldName = "Old team name";
-        given(teamService.getById(teamId)).willReturn(mockedTeam);
-        when(mockedTeam.isActive()).thenReturn(true);
-        when(mockedTeam.getName()).thenReturn(oldName);
-
-        JSONObject newTeamValues = new JSONObject();
-        newTeamValues.put("name", "New much cooler name");
-        newTeamValues.put("active", false);
-
-        ResponseEntity<Void> response = restTemplate
-                .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), Void.class);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    public void notAllowedToChangeTeamId() {
-        doNothing().when(securityUserService).verify(token);
-        given(teamService.getById(teamId)).willReturn(mockedTeam);
-        when(mockedTeam.isActive()).thenReturn(false);
-        Long oldId = 16546312L;
-        when(mockedTeam.getId()).thenReturn(oldId);
-
-        JSONObject newTeamValues = new JSONObject();
-        Long newId = 2365L;
-        newTeamValues.put("id", newId);
-        newTeamValues.put("active", true);
-
-        restTemplate.setErrorHandler(new ResponseErrorIgnorer());
-
-        ResponseEntity<ErrorMessage> response = restTemplate
-                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null),
-                            ErrorMessage.class);
-        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
-        String expectedMessage = "Not allowed to update id on Team. Team id was '1001', id in request body was '2365'";
-        assertEquals(expectedMessage, response.getBody().getMessage());
-    }
-
-    @Test
-    public void canAddUserToTeamUsingUsernumber() {
-        doNothing().when(securityUserService).verify(token);
-        Long usernumber = 1001L;
-        Long userId = 64648949L;
-        given(userService.getByUserNumber(usernumber)).willReturn(mockedUser);
-        when(mockedUser.getId()).thenReturn(userId);
-        given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
-
-        JSONObject userToAdd = new JSONObject();
-        userToAdd.put("userNumber", usernumber);
-
-        ResponseEntity<Void> response = restTemplate.exchange(createUri(
-                teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    public void canAddUserToTeamUsingUserId() {
-        doNothing().when(securityUserService).verify(token);
-        Long userId = 1001L;
-        given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
-
-        JSONObject userToAdd = new JSONObject();
-        userToAdd.put("id", "1001");
-
-        ResponseEntity<Void> response = restTemplate
-                .exchange(createUri(teamResource + teamId + "/users"), PUT,
-                        createHttpEntity(userToAdd, null), Void.class);
-
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
-    }
-
-    @Test
-    public void createTeamWithUsersShouldReturnForbidden() throws URISyntaxException {
-        doNothing().when(securityUserService).verify(token);
-        exception.expect(HttpClientErrorException.class);
-        exception.expectMessage("403 null");
-
-        JSONObject teamToCreate = new JSONObject();
-        teamToCreate.put("name", mockedTeam.getName());
-        Collection<Long> usersId = new ArrayList<>();
-        usersId.add(24564L);
-        teamToCreate.put("usersId", usersId);
-
-        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
-    }
-
-    @Test
-    public void createTeamPassingTeamIdShouldReturnForbidden() throws URISyntaxException {
-        doNothing().when(securityUserService).verify(token);
-        exception.expect(HttpClientErrorException.class);
-        exception.expectMessage("403 null");
-
-        JSONObject teamToCreate = new JSONObject();
-        teamToCreate.put("name", mockedTeam.getName());
-        teamToCreate.put("id", 216516L);
-
-        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
-    }
-
-    @Test
-    public void createTeam() throws URISyntaxException {
-        given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
-        doNothing().when(securityUserService).verify(token);
-        when(mockedTeam.getId()).thenReturn(teamId);
-
-        JSONObject teamToCreate = new JSONObject();
-        teamToCreate.put("name", mockedTeam.getName());
-        teamToCreate.put("active", true);
-
-        ResponseEntity<String> response = restTemplate
-                .exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
-
-        assertEquals(HttpStatus.CREATED, response.getStatusCode());
-        String expectedLocation = "/jaxson" + teamResource + teamId;
-        assertTrue(response.getHeaders().getLocation().toString().endsWith(expectedLocation));
-    }
-
-    @Test
-    public void getTeamById() throws URISyntaxException {
-        given(teamService.getById(teamId)).willReturn(team);
-        doNothing().when(securityUserService).verify(token);
-        ResponseEntity<TeamDto> response = restTemplate.exchange(
-                createUri(teamResource + teamId), GET, createHttpEntity(null, null), TeamDto.class);
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(new TeamDto(team), response.getBody());
-    }
+//    @Test
+//    public void canGetAllTeams() {
+//        doNothing().when(secureUserService).verify(token);
+//        List<Team> teams = new ArrayList<>();
+//        teams.add(mockedTeam);
+//        given(teamService.getAll()).willReturn(teams);
+//        ResponseEntity<TeamDto[]> response = restTemplate
+//                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
+//        assertEquals(1, response.getBody().length);
+//    }
+//
+//    @Test
+//    public void getAllTeamsShouldReturnEmptyListIfNoTeamExist() {
+//        doNothing().when(secureUserService).verify(token);
+//        given(teamService.getAll()).willReturn(new ArrayList<>());
+//        ResponseEntity<TeamDto[]> response = restTemplate
+//                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), TeamDto[].class);
+//        assertEquals(0, response.getBody().length);
+//    }
+//
+//    @Test
+//    public void getAllTeamsShouldReturnEmptyArrayIfNoTeamsExist() {
+//        doNothing().when(secureUserService).verify(token);
+//        given(teamService.getAll()).willReturn(new ArrayList<>());
+//        ResponseEntity<Collection> response = restTemplate
+//                .exchange(createUri(teamResource), GET, createHttpEntity(null, null), Collection.class);
+//        assertTrue(response.getBody().isEmpty());
+//    }
+//
+//    @Test
+//    public void canUpdateTeam() {
+//        doNothing().when(secureUserService).verify(token);
+//        String oldName = "Old team name";
+//        given(teamService.getById(teamId)).willReturn(mockedTeam);
+//        when(mockedTeam.isActive()).thenReturn(true);
+//        when(mockedTeam.getName()).thenReturn(oldName);
+//
+//        JSONObject newTeamValues = new JSONObject();
+//        newTeamValues.put("name", "New much cooler name");
+//        newTeamValues.put("active", false);
+//
+//        ResponseEntity<Void> response = restTemplate
+//                .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null), Void.class);
+//
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
+//
+//    @Test
+//    public void notAllowedToChangeTeamId() {
+//        doNothing().when(secureUserService).verify(token);
+//        given(teamService.getById(teamId)).willReturn(mockedTeam);
+//        when(mockedTeam.isActive()).thenReturn(false);
+//        Long oldId = 16546312L;
+//        when(mockedTeam.getId()).thenReturn(oldId);
+//
+//        JSONObject newTeamValues = new JSONObject();
+//        Long newId = 2365L;
+//        newTeamValues.put("id", newId);
+//        newTeamValues.put("active", true);
+//
+//        restTemplate.setErrorHandler(new ResponseErrorIgnorer());
+//
+//        ResponseEntity<ErrorMessage> response = restTemplate
+//                    .exchange(createUri(teamResource + teamId), PUT, createHttpEntity(newTeamValues, null),
+//                            ErrorMessage.class);
+//        assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+//        String expectedMessage = "Not allowed to update id on Team. Team id was '1001', id in request body was '2365'";
+//        assertEquals(expectedMessage, response.getBody().getMessage());
+//    }
+//
+//    @Test
+//    public void canAddUserToTeamUsingUsernumber() {
+//        doNothing().when(secureUserService).verify(token);
+//        Long usernumber = 1001L;
+//        Long userId = 64648949L;
+//        given(userService.getByUserNumber(usernumber)).willReturn(mockedUser);
+//        when(mockedUser.getId()).thenReturn(userId);
+//        given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
+//
+//        JSONObject userToAdd = new JSONObject();
+//        userToAdd.put("userNumber", usernumber);
+//
+//        ResponseEntity<Void> response = restTemplate.exchange(createUri(
+//                teamResource + teamId + "/users"), PUT, createHttpEntity(userToAdd, null), Void.class);
+//
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
+//
+//    @Test
+//    public void canAddUserToTeamUsingUserId() {
+//        doNothing().when(secureUserService).verify(token);
+//        Long userId = 1001L;
+//        given(teamService.addUserToTeam(teamId, userId)).willReturn(mockedTeam);
+//
+//        JSONObject userToAdd = new JSONObject();
+//        userToAdd.put("id", "1001");
+//
+//        ResponseEntity<Void> response = restTemplate
+//                .exchange(createUri(teamResource + teamId + "/users"), PUT,
+//                        createHttpEntity(userToAdd, null), Void.class);
+//
+//        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+//    }
+//
+//    @Test
+//    public void createTeamWithUsersShouldReturnForbidden() throws URISyntaxException {
+//        doNothing().when(secureUserService).verify(token);
+//        exception.expect(HttpClientErrorException.class);
+//        exception.expectMessage("403 null");
+//
+//        JSONObject teamToCreate = new JSONObject();
+//        teamToCreate.put("name", mockedTeam.getName());
+//        Collection<Long> usersId = new ArrayList<>();
+//        usersId.add(24564L);
+//        teamToCreate.put("usersId", usersId);
+//
+//        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
+//    }
+//
+//    @Test
+//    public void createTeamPassingTeamIdShouldReturnForbidden() throws URISyntaxException {
+//        doNothing().when(secureUserService).verify(token);
+//        exception.expect(HttpClientErrorException.class);
+//        exception.expectMessage("403 null");
+//
+//        JSONObject teamToCreate = new JSONObject();
+//        teamToCreate.put("name", mockedTeam.getName());
+//        teamToCreate.put("id", 216516L);
+//
+//        restTemplate.exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
+//    }
+//
+//    @Test
+//    public void createTeam() throws URISyntaxException {
+//        given(teamService.create(mockedTeam.getName())).willReturn(mockedTeam);
+//        doNothing().when(secureUserService).verify(token);
+//        when(mockedTeam.getId()).thenReturn(teamId);
+//
+//        JSONObject teamToCreate = new JSONObject();
+//        teamToCreate.put("name", mockedTeam.getName());
+//        teamToCreate.put("active", true);
+//
+//        ResponseEntity<String> response = restTemplate
+//                .exchange(createUri(teamResource), POST, createHttpEntity(teamToCreate, null), String.class);
+//
+//        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+//        String expectedLocation = "/jaxson" + teamResource + teamId;
+//        assertTrue(response.getHeaders().getLocation().toString().endsWith(expectedLocation));
+//    }
+//
+//    @Test
+//    public void getTeamById() throws URISyntaxException {
+//        given(teamService.getById(teamId)).willReturn(team);
+//        doNothing().when(secureUserService).verify(token);
+//        ResponseEntity<TeamDto> response = restTemplate.exchange(
+//                createUri(teamResource + teamId), GET, createHttpEntity(null, null), TeamDto.class);
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals(new TeamDto(team), response.getBody());
+//    }
 
     private URI createUri(String resource) {
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(baseUrl + resource);

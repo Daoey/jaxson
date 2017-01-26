@@ -1,51 +1,61 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import static java.time.temporal.ChronoUnit.SECONDS;
-
-import java.time.LocalDateTime;
-
+import java.time.Instant;
 import javax.ws.rs.core.Response;
-
 import org.springframework.beans.factory.annotation.Autowired;
-
 import se.teknikhogskolan.jaxson.model.Credentials;
-import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
-import se.teknikhogskolan.springcasemanagement.service.SecurityUserService;
+import se.teknikhogskolan.springcasemanagement.security.JwtBuilder;
+import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
 
 public final class SecurityResourceImpl implements SecurityResource {
 
-    private final SecurityUserService securityUserService;
+    private final SecureUserService secureUserService;
+
+    private final long loginDurationSeconds = 60; // TODO loosen up login duration and put in one place
 
     @Autowired
-    public SecurityResourceImpl(SecurityUserService securityUserService) {
-        this.securityUserService = securityUserService;
+    public SecurityResourceImpl(SecureUserService secureUserService) {
+        this.secureUserService = secureUserService;
     }
 
     @Override
-    public Response createUser(Credentials credentials) {
-        securityUserService.create(credentials.getUsername(), credentials.getPassword());
-        return Response.ok(createTokenWithCredentials(credentials)).build();
+    public Response createUser(Credentials credentials) { // TODO add refresh token to response
+        secureUserService.create(credentials.getUsername(), credentials.getPassword());
+        return Response.ok(createToken(credentials.getUsername(), getDefaultExpiration(), "authorization")).build();
+    }
+
+    private String getDefaultExpiration() {
+        return String.valueOf(getNowEpochTime() + loginDurationSeconds);
+    }
+
+    private long getNowEpochTime() {
+        return Instant.now().getEpochSecond();
+    }
+
+    private String createToken(String username, String exp, String sub) {
+        if (sub == null) throw new IllegalArgumentException("Subject must have value");
+        if (exp == null) throw new IllegalArgumentException("Expires must have value");
+        if (username == null || secureUserService.usernameIsAvailable(username)) {
+            throw new IllegalArgumentException("No such user");
+        }
+
+        JwtBuilder jwtBuilder = new JwtBuilder();
+        jwtBuilder.putClaim("username", username);
+        jwtBuilder.putClaim("exp", exp);
+        jwtBuilder.putClaim("sub", sub);
+
+        return jwtBuilder.build();
     }
 
     @Override
-    public Response authenticateUser(Credentials credentials) {
-        return Response.ok(createTokenWithCredentials(credentials)).build();
+    public Response authenticateUser(Credentials credentials) { // TODO add refresh token to response
+        return Response.ok(createToken(credentials.getUsername(), getDefaultExpiration(), "authorization")).build();
     }
 
-    private Token createTokenWithCredentials(Credentials credentials) {
-        if (credentials.getPassword() == null) {
-            throw new IllegalArgumentException("Password can't be null");
-        }
-        if (credentials.getUsername() == null) {
-            throw new IllegalArgumentException("Username can't be null");
-        }
-        String token = securityUserService.createTokenFor(credentials.getUsername(), credentials.getPassword());
-        long expirationTime = getSecondsLeft(securityUserService.getExpiration(token));
-        return new Token(token, expirationTime);
+    @Override
+    public Response getNewAuthToken() {
+        return null;
     }
 
-    private long getSecondsLeft(LocalDateTime created) {
-        return SECONDS.between(LocalDateTime.now(), created);
-    }
 }

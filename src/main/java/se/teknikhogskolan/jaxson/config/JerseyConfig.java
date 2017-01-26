@@ -6,6 +6,7 @@ import org.glassfish.jersey.server.ResourceConfig;
 import org.springframework.stereotype.Component;
 
 import se.teknikhogskolan.jaxson.exception.DatabaseExceptionMapper;
+import se.teknikhogskolan.jaxson.exception.EncodingExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.IllegalArgumentExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.MaximumQuantityExceptionMapper;
 import se.teknikhogskolan.jaxson.exception.NotAllowedExceptionMapper;
@@ -17,6 +18,7 @@ import se.teknikhogskolan.jaxson.resource.implementation.TeamResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.UserResourceImpl;
 import se.teknikhogskolan.jaxson.resource.implementation.WorkItemResourceImpl;
 import se.teknikhogskolan.jaxson.security.AuthorizationRequestFilter;
+import se.teknikhogskolan.jaxson.security.AuthorizationResponseFilter;
 
 @Component
 @ApplicationPath("jaxson")
@@ -29,6 +31,7 @@ public final class JerseyConfig extends ResourceConfig {
         register(SecurityResourceImpl.class);
 
         register(AuthorizationRequestFilter.class);
+        register(AuthorizationResponseFilter.class);
 
         register(DatabaseExceptionMapper.class);
         register(NotFoundExceptionMapper.class);
@@ -37,5 +40,6 @@ public final class JerseyConfig extends ResourceConfig {
         register(IllegalArgumentExceptionMapper.class);
         register(RuntimeExceptionMapper.class);
         register(NotAuthorizedExceptionMapper.class);
+        register(EncodingExceptionMapper.class);
     }
 }
