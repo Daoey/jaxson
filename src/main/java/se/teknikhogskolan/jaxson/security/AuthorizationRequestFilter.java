@@ -13,6 +13,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter { // T
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
+        // TODO check failing exception mappers
         
         UriInfo uriInfo = requestContext.getUriInfo();
 

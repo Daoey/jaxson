@@ -3,20 +3,19 @@ package se.teknikhogskolan.jaxson.resource.implementation;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import javax.ws.rs.NotAuthorizedException;
 import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
+import se.teknikhogskolan.jaxson.security.AuthorizeDurations;
 import se.teknikhogskolan.springcasemanagement.security.JwtBuilder;
 import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
 
 public final class SecurityResourceImpl implements SecurityResource {
 
     private final SecureUserService secureUserService;
-
-    private final long loginDurationSeconds = 60; // TODO loosen up login duration and put in one place
-    private final long refreshDurationSeconds = 7 *24 * 60 * 60;
 
     @Autowired
     public SecurityResourceImpl(SecureUserService secureUserService) {
@@ -30,21 +29,26 @@ public final class SecurityResourceImpl implements SecurityResource {
     }
 
     private Map<String, Token> createTokens(Credentials credentials) {
+
         Map<String, Token> tokens = new HashMap<>();
 
-        Long authorizationExpiration = getDefaultExpiration();
-        Token authToken = new Token(createJwt(credentials.getUsername(), authorizationExpiration.toString(), "authorization"), authorizationExpiration);
+        Long authorizationExpiration = getLoginExpiration();
+        Token authToken = new Token(
+                createJwt(credentials.getUsername(), authorizationExpiration.toString(), "authorization"),
+                authorizationExpiration);
         tokens.put("authorization token", authToken);
 
         Long refreshExpiration = getRefreshExpiration();
-        Token refreshToken = new Token(createJwt(credentials.getUsername(), refreshExpiration.toString(), "refresh"), refreshExpiration);
+        Token refreshToken = new Token(
+                createJwt(credentials.getUsername(), refreshExpiration.toString(), "refresh"),
+                refreshExpiration);
         tokens.put("refresh token", refreshToken);
 
         return tokens;
     }
 
-    private Long getDefaultExpiration() {
-        return (getNowEpochTime() + loginDurationSeconds);
+    private Long getLoginExpiration() {
+        return (getNowEpochTime() + AuthorizeDurations.LOGIN);
     }
 
     private long getNowEpochTime() {
@@ -52,7 +56,7 @@ public final class SecurityResourceImpl implements SecurityResource {
     }
 
     private Long getRefreshExpiration() {
-        return (getNowEpochTime() + refreshDurationSeconds);
+        return (getNowEpochTime() + AuthorizeDurations.REFRESH);
     }
 
     private String createJwt(String username, String exp, String sub) {

@@ -17,18 +17,13 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
     private final long loginDurationSeconds = 60; // TODO loosen up login duration and put in one place together with epoch
 
     @Override
-    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
-            throws IOException {
+    public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext) throws IOException {
 
         UriInfo uriInfo = requestContext.getUriInfo();
 
         if ("token".equals(uriInfo.getPath())) {
 
-            String authorizationHeader = requestContext.getHeaderString("Authorization");
-            String token = authorizationHeader.substring("Bearer".length()).trim();
-
-            JwtReader jwtReader = new JwtReader();
-            Map<String, String> claims = jwtReader.readClaims(token);
+            Map<String, String> claims = getClaims(requestContext);
 
             if (!"refresh".equals(claims.get("sub"))) throw new IllegalArgumentException("Refresh token missing");
 
@@ -38,11 +33,42 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
             jwtBuilder.putClaim("exp", exp.toString());
             jwtBuilder.putClaim("username", claims.get("username"));
 
-            responseContext.setEntity(new Token(jwtBuilder.build(), exp.longValue()));
+            if (!"refresh".equals(claims.get("sub"))) throw new IllegalArgumentException("Refresh token missing");
+
+            responseContext.setEntity(createAuthToken(claims.get("username")));
 
         }
 
-        responseContext.getHeaders().add("X-Powered-By", "Jersey :-)");
+        if ("users".equals(uriInfo.getPath()) || "teams".equals(uriInfo.getPath()) || "workitems".equals(uriInfo.getPath())) {
+            Map<String, String> claims = getClaims(requestContext);
+
+            Token token = createAuthToken(claims.get("username"));
+
+            responseContext.getHeaders().add("authorization-token", token.getToken());
+            responseContext.getHeaders().add("authorization-token-expires", token.getExpirationTime());
+        }
+    }
+
+    private Map<String, String> getClaims(ContainerRequestContext requestContext) {
+
+        String authorizationHeader = requestContext.getHeaderString("Authorization");
+        String token = authorizationHeader.substring("Bearer".length()).trim();
+
+        JwtReader jwtReader = new JwtReader();
+
+        return jwtReader.readClaims(token);
+    }
+
+    private Token createAuthToken(String username) {
+
+        JwtBuilder jwtBuilder = new JwtBuilder();
+        jwtBuilder.putClaim("sub", "authorization");
+        Long exp = getDefaultExpiration();
+        jwtBuilder.putClaim("exp", exp.toString());
+        jwtBuilder.putClaim("username", username);
+
+        return new Token(jwtBuilder.build(), exp.longValue());
+
     }
 
     public Long getDefaultExpiration() {

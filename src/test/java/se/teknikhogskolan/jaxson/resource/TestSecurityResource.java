@@ -6,10 +6,14 @@ import static javax.ws.rs.core.Response.Status.OK;
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
+import java.util.List;
+import java.util.Map;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
+import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
@@ -26,6 +30,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import se.teknikhogskolan.jaxson.JaxsonApplication;
 import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.Token;
+import se.teknikhogskolan.jaxson.model.UserDto;
 import se.teknikhogskolan.springcasemanagement.config.hsql.HsqlInfrastructureConfig;
 
 @RunWith(SpringRunner.class)
@@ -59,17 +64,19 @@ public final class TestSecurityResource {
     }
 
     @Test
-    public void registerUserShouldReturnToken() {
+    public void registerUserShouldReturnBothAuthAndRefreshToken() {
         Response response = registerUser();
-        Token token = response.readEntity(Token.class);
-        assertNotNull(token.getToken());
+        Map<String, Token> result = response.readEntity(new GenericType<Map<String, Token>>(){});
+        assertTrue(result.containsKey("authorization token"));
+        assertTrue(result.containsKey("refresh token"));
     }
 
     @Test
     public void registerUserShouldReturnExpirationTime() {
         Response response = registerUser();
-        Token token = response.readEntity(Token.class);
-        assertNotNull(token.getExpirationTime());
+        Map<String, Token> result = response.readEntity(new GenericType<Map<String, Token>>(){});
+        assertTrue(result.containsKey("authorization token"));
+        assertTrue(result.containsKey("refresh token"));
     }
 
     @Test
@@ -101,19 +108,21 @@ public final class TestSecurityResource {
     }
 
     @Test
-    public void loginUserShouldReturnToken() {
+    public void loginUserShouldReturnTokens() {
         registerUser();
         Response response = loginUser();
-        Token token = response.readEntity(Token.class);
-        assertNotNull(token.getToken());
+        Map<String, Token> result = response.readEntity(new GenericType<Map<String, Token>>(){});
+        assertNotNull(result.get("refresh token").getToken());
+        assertNotNull(result.get("authorization token").getToken());
     }
 
     @Test
     public void loginUserShouldReturnExpirationTime() {
         registerUser();
         Response response = loginUser();
-        Token token = response.readEntity(Token.class);
-        assertNotNull(token.getExpirationTime());
+        Map<String, Token> result = response.readEntity(new GenericType<Map<String, Token>>(){});
+        assertNotNull(result.get("authorization token").getExpirationTime());
+        assertNotNull(result.get("refresh token").getExpirationTime());
     }
 
     @Test
@@ -122,6 +131,7 @@ public final class TestSecurityResource {
         this.credentials = new Credentials("wrong", "wrong");
         Response response = loginUser();
         assertEquals(NOT_FOUND, response.getStatusInfo());
+        System.out.println(response.getEntity().toString());
     }
 
     @Test
