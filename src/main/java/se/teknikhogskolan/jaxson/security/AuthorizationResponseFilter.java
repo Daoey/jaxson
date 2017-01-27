@@ -21,17 +21,10 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
 
         UriInfo uriInfo = requestContext.getUriInfo();
 
-        if ("token".equals(uriInfo.getPath())) {
+        if ("token".equals(uriInfo.getPath())) { // TODO move to resource
+            // TODO https://www.mkyong.com/webservices/jax-rs/get-http-header-in-jax-rs/
 
             Map<String, String> claims = getClaims(requestContext);
-
-            if (!"refresh".equals(claims.get("sub"))) throw new IllegalArgumentException("Refresh token missing");
-
-            JwtBuilder jwtBuilder = new JwtBuilder();
-            jwtBuilder.putClaim("sub", "authorization");
-            Long exp = getDefaultExpiration();
-            jwtBuilder.putClaim("exp", exp.toString());
-            jwtBuilder.putClaim("username", claims.get("username"));
 
             if (!"refresh".equals(claims.get("sub"))) throw new IllegalArgumentException("Refresh token missing");
 
