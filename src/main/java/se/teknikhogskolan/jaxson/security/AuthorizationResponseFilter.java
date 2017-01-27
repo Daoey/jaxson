@@ -13,15 +13,16 @@ import se.teknikhogskolan.springcasemanagement.security.JwtReader;
 
 public class AuthorizationResponseFilter implements ContainerResponseFilter {
 
+    // TODO put login duration and refresh time in config file
     private final long loginDurationSeconds = 60; // TODO loosen up login duration and put in one place together with epoch
 
     @Override
     public void filter(ContainerRequestContext requestContext, ContainerResponseContext responseContext)
             throws IOException {
 
-        UriInfo uriInfo = requestContext.getUriInfo(); // TODO remove 'CONFIG FILE:'
+        UriInfo uriInfo = requestContext.getUriInfo();
 
-        if ("token".equals(uriInfo.getPath())) { // TODO test if works
+        if ("token".equals(uriInfo.getPath())) {
 
             String authorizationHeader = requestContext.getHeaderString("Authorization");
             String token = authorizationHeader.substring("Bearer".length()).trim();
@@ -38,7 +39,7 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
             jwtBuilder.putClaim("username", claims.get("username"));
 
             responseContext.setEntity(new Token(jwtBuilder.build(), exp.longValue()));
-            return;
+
         }
 
         responseContext.getHeaders().add("X-Powered-By", "Jersey :-)");

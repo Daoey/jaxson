@@ -1,22 +1,15 @@
 package se.teknikhogskolan.jaxson.security;
 
 import java.io.IOException;
-import java.time.Instant;
 import java.util.Map;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.UriInfo;
-import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.springcasemanagement.security.JwtReader;
-import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
 import se.teknikhogskolan.springcasemanagement.service.exception.NotAuthorizedException;
 
-public class AuthorizationRequestFilter implements ContainerRequestFilter {
-
-    private final long loginDurationSecond = 60; // TODO loosen up login duration
-
-    @Autowired
-    private SecureUserService secureUserService;
+public class AuthorizationRequestFilter implements ContainerRequestFilter { // TODO CLEAN!!!1!
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
@@ -25,9 +18,6 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
         if ("register".equals(uriInfo.getPath()) || "login".equals(uriInfo.getPath())) {
             return; // Let logins and registrations pass, handled by SecurityResource
-        }
-        if ("token".equals(uriInfo.getPath())) {
-            return; // Handled by AuthorizationRESPONSEFilter
         }
 
         String authorizationHeader = requestContext.getHeaderString("Authorization");
@@ -39,9 +29,17 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
         JwtReader jwtReader = new JwtReader();
         Map<String, String> claims = jwtReader.readClaims(token); // this "verifies" the token TODO verify(token)
+        String subject = claims.get("sub");
 
-//        secureUserService.verify(token);
+        if ("token".equals(uriInfo.getPath())) {
+            if ("refresh".equals(subject)) return; // already verified is valid token
+            else throw new BadRequestException(String.format("Only refresh tokens allowed here, this was '%s'", subject));
+        } else {
+            if ("refresh".equals(subject)) throw new BadRequestException("Send refresh tokens to /token");
+        }
 
-//        secureUserService.renewExpiration(token); // TODO renew token in Responsefilter
+        if ("authorization".equals(subject)) return; // already verified is valid token
+
+        throw new NotAuthorizedException("Not authorized, please login");
     }
 }

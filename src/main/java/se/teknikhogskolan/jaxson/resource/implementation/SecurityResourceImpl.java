@@ -77,7 +77,7 @@ public final class SecurityResourceImpl implements SecurityResource {
 
     @Override
     public Response getNewAuthToken() {
-        return null;
+        return Response.ok().build(); // New token added by AuthorizationResponseFilter
     }
 
 }
