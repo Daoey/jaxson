@@ -28,7 +28,6 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
     }
 
     private boolean authorized(String authorizationHeader) {
-        System.out.println();
         if (null == authorizationHeader) return false;
         final String token = authorizationHeader.substring("Bearer".length()).trim();
         final JwtReader jwtReader = new JwtReader();

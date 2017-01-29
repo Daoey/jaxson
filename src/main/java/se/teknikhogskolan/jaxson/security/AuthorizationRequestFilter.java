@@ -2,55 +2,66 @@ package se.teknikhogskolan.jaxson.security;
 
 import java.io.IOException;
 import java.util.Map;
-import javax.ws.rs.BadRequestException;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.UriInfo;
 import se.teknikhogskolan.jaxson.exception.ErrorMessage;
 import se.teknikhogskolan.springcasemanagement.security.JwtReader;
-import se.teknikhogskolan.springcasemanagement.service.exception.NotAuthorizedException;
 
 import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
-public class AuthorizationRequestFilter implements ContainerRequestFilter { // TODO CLEAN!!!1!
+public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        // TODO check failing exception mappers
         
-        UriInfo uriInfo = requestContext.getUriInfo();
+        final String requestedPath = requestContext.getUriInfo().getPath();
+        final String authorizationHeader = requestContext.getHeaderString("Authorization");
 
-        if ("register".equals(uriInfo.getPath()) || "login".equals(uriInfo.getPath())) {
-            return; // Let logins and registrations pass, handled by SecurityResource
+        if (isResource(requestedPath) && isAuthorized(authorizationHeader)) {
+            return;
         }
 
-        String authorizationHeader = requestContext.getHeaderString("Authorization");
-
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            ErrorMessage message = new ErrorMessage(UNAUTHORIZED.getStatusCode(), UNAUTHORIZED.toString(),
-                    "Authorization header must be provided");
-            throw new WebApplicationException(Response.status(UNAUTHORIZED).entity(message).build());
+        if (isAuthToken(requestedPath) && hasValidRefreshToken(authorizationHeader)) {
+            return;
         }
+
+        if (isLogin(requestedPath)) {
+            return;
+        }
+
+        final ErrorMessage message = new ErrorMessage(UNAUTHORIZED.getStatusCode(), UNAUTHORIZED.toString(),
+                "Not authorized, please login");
+        throw new WebApplicationException(Response.status(UNAUTHORIZED).entity(message).build());
+    }
+
+    private boolean isAuthToken(String path) {
+        return "token".equals(path);
+    }
+
+    private boolean isAuthorized(String authorizationHeader) {
+        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return false;
+        String token = authorizationHeader.substring("Bearer".length()).trim();
+        JwtReader jwtReader = new JwtReader();
+        return jwtReader.isValid(token);
+    }
+
+    private boolean hasValidRefreshToken(String authorizationHeader) {
+        if (!isAuthorized(authorizationHeader)) return false;
 
         String token = authorizationHeader.substring("Bearer".length()).trim();
         JwtReader jwtReader = new JwtReader();
-        if (!jwtReader.isValid(token)) {
-            throw new WebApplicationException(Response.status(UNAUTHORIZED).entity("Broken JWT").build());
-        }
         Map<String, String> claims = jwtReader.readClaims(token);
-        String subject = claims.get("sub");
 
-        if ("token".equals(uriInfo.getPath())) {
-            if ("refresh".equals(subject)) return; // already verified is valid token
-            else throw new BadRequestException(String.format("Only refresh tokens allowed here, this was '%s'", subject));
-        } else {
-            if ("refresh".equals(subject)) throw new BadRequestException("Send refresh tokens to /token");
-        }
+        return "refresh".equals(claims.get("sub"));
+    }
 
-        if ("authorization".equals(subject)) return; // already verified is valid token
+    private boolean isLogin(String resource) {
+        return "login".equals(resource);
+    }
 
-        throw new NotAuthorizedException("Not authorized, please login");
+    private boolean isResource(String resource) {
+        return "users".equals(resource) || "workitems".equals(resource) || "teams".equals(resource);
     }
 }
