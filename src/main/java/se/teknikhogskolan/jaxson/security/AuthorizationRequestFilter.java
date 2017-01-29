@@ -36,8 +36,8 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
         throw new WebApplicationException(Response.status(UNAUTHORIZED).entity(message).build());
     }
 
-    private boolean isAuthToken(String path) {
-        return "token".equals(path);
+    private boolean isResource(String resource) {
+        return "users".equals(resource) || "workitems".equals(resource) || "teams".equals(resource);
     }
 
     private boolean isAuthorized(String authorizationHeader) {
@@ -45,6 +45,10 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
         String token = authorizationHeader.substring("Bearer".length()).trim();
         JwtReader jwtReader = new JwtReader();
         return jwtReader.isValid(token);
+    }
+
+    private boolean isAuthToken(String path) {
+        return "token".equals(path);
     }
 
     private boolean hasValidRefreshToken(String authorizationHeader) {
@@ -59,9 +63,5 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     private boolean isLogin(String resource) {
         return "login".equals(resource);
-    }
-
-    private boolean isResource(String resource) {
-        return "users".equals(resource) || "workitems".equals(resource) || "teams".equals(resource);
     }
 }
