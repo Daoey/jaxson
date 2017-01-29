@@ -3,11 +3,16 @@ package se.teknikhogskolan.jaxson.security;
 import java.io.IOException;
 import java.util.Map;
 import javax.ws.rs.BadRequestException;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.container.ContainerRequestContext;
 import javax.ws.rs.container.ContainerRequestFilter;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import se.teknikhogskolan.jaxson.exception.ErrorMessage;
 import se.teknikhogskolan.springcasemanagement.security.JwtReader;
 import se.teknikhogskolan.springcasemanagement.service.exception.NotAuthorizedException;
+
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
 
 public class AuthorizationRequestFilter implements ContainerRequestFilter { // TODO CLEAN!!!1!
 
@@ -22,14 +27,19 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter { // T
         }
 
         String authorizationHeader = requestContext.getHeaderString("Authorization");
-        String token = authorizationHeader.substring("Bearer".length()).trim();
 
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new NotAuthorizedException("Authorization header must be provided");
+            ErrorMessage message = new ErrorMessage(UNAUTHORIZED.getStatusCode(), UNAUTHORIZED.toString(),
+                    "Authorization header must be provided");
+            throw new WebApplicationException(Response.status(UNAUTHORIZED).entity(message).build());
         }
 
+        String token = authorizationHeader.substring("Bearer".length()).trim();
         JwtReader jwtReader = new JwtReader();
-        Map<String, String> claims = jwtReader.readClaims(token); // this "verifies" the token TODO verify(token)
+        if (!jwtReader.isValid(token)) {
+            throw new WebApplicationException(Response.status(UNAUTHORIZED).entity("Broken JWT").build());
+        }
+        Map<String, String> claims = jwtReader.readClaims(token);
         String subject = claims.get("sub");
 
         if ("token".equals(uriInfo.getPath())) {

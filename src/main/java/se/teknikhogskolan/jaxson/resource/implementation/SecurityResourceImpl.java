@@ -3,14 +3,16 @@ package se.teknikhogskolan.jaxson.resource.implementation;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
-import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.BadRequestException;
 import javax.ws.rs.core.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
 import se.teknikhogskolan.jaxson.security.AuthorizeDurations;
+import se.teknikhogskolan.jaxson.security.JwtHelper;
 import se.teknikhogskolan.springcasemanagement.security.JwtBuilder;
+import se.teknikhogskolan.springcasemanagement.security.JwtReader;
 import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
 
 public final class SecurityResourceImpl implements SecurityResource {
@@ -80,8 +82,22 @@ public final class SecurityResourceImpl implements SecurityResource {
     }
 
     @Override
-    public Response getNewAuthToken() {
-        return Response.ok().build(); // New token added by AuthorizationResponseFilter
-    }
+    public Response getNewAuthToken(String refreshToken) {
+        refreshToken = refreshToken.substring(7);
 
+        JwtReader reader =  new JwtReader();
+        Map<String, String> claims = reader.readClaims(refreshToken);
+
+        if (!"refresh".equals(claims.get("sub"))) {
+            throw new BadRequestException("Only refresh Tokens is valid for retrieving authorization Tokens");
+        }
+
+        final String username = claims.get("username");
+        if (null == username || username.isEmpty()) {
+            throw new BadRequestException("Username is missing");
+        }
+
+        JwtHelper jwtHelper = new JwtHelper();
+        return Response.ok(jwtHelper.generateAuthorizationToken(username)).build();
+    }
 }
