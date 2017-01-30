@@ -5,9 +5,8 @@ import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.springcasemanagement.security.JwtBuilder;
 
 public class JwtHelper {
-    // TODO loosen up login duration
-    // TODO read jwt durations from config file
-    private final int loginDuration = 60;
+
+    private final int loginDuration = 60; // TODO make login last longer
     private final int refreshDuration = 60 * 60 * 24 * 7;
 
     public Token generateAuthorizationToken(String username) {

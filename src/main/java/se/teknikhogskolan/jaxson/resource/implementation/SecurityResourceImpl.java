@@ -1,6 +1,5 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.BadRequestException;
@@ -9,11 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import se.teknikhogskolan.jaxson.model.Credentials;
 import se.teknikhogskolan.jaxson.model.Token;
 import se.teknikhogskolan.jaxson.resource.SecurityResource;
-import se.teknikhogskolan.jaxson.security.AuthorizeDurations;
 import se.teknikhogskolan.jaxson.security.JwtHelper;
-import se.teknikhogskolan.springcasemanagement.security.JwtBuilder;
 import se.teknikhogskolan.springcasemanagement.security.JwtReader;
 import se.teknikhogskolan.springcasemanagement.service.SecureUserService;
+import se.teknikhogskolan.springcasemanagement.service.exception.NotAuthorizedException;
 
 public final class SecurityResourceImpl implements SecurityResource {
 
@@ -31,54 +29,19 @@ public final class SecurityResourceImpl implements SecurityResource {
     }
 
     private Map<String, Token> createTokens(Credentials credentials) {
-
+        JwtHelper helper = new JwtHelper();
         Map<String, Token> tokens = new HashMap<>();
-
-        Long authorizationExpiration = getLoginExpiration();
-        Token authToken = new Token(
-                createJwt(credentials.getUsername(), authorizationExpiration.toString(), "authorization"),
-                authorizationExpiration);
-        tokens.put("authorization token", authToken);
-
-        Long refreshExpiration = getRefreshExpiration();
-        Token refreshToken = new Token(
-                createJwt(credentials.getUsername(), refreshExpiration.toString(), "refresh"),
-                refreshExpiration);
-        tokens.put("refresh token", refreshToken);
-
+        tokens.put("authorization token", helper.generateAuthorizationToken(credentials.getUsername()));
+        tokens.put("refresh token", helper.generateRefreshToken(credentials.getUsername()));
         return tokens;
-    }
-
-    private Long getLoginExpiration() {
-        return (getNowEpochTime() + AuthorizeDurations.LOGIN);
-    }
-
-    private long getNowEpochTime() {
-        return Instant.now().getEpochSecond();
-    }
-
-    private Long getRefreshExpiration() {
-        return (getNowEpochTime() + AuthorizeDurations.REFRESH);
-    }
-
-    private String createJwt(String username, String exp, String sub) {
-        if (sub == null) throw new IllegalArgumentException("Subject must have value");
-        if (exp == null) throw new IllegalArgumentException("Expires must have value");
-        if (username == null || secureUserService.usernameIsAvailable(username)) {
-            throw new IllegalArgumentException("No such user");
-        }
-
-        JwtBuilder jwtBuilder = new JwtBuilder();
-        jwtBuilder.putClaim("username", username);
-        jwtBuilder.putClaim("exp", exp);
-        jwtBuilder.putClaim("sub", sub);
-
-        return jwtBuilder.build();
     }
 
     @Override
     public Response authenticateUser(Credentials credentials) {
-        return Response.ok(createTokens(credentials)).build();
+        if (secureUserService.isValid(credentials.getUsername(), credentials.getPassword())) {
+            return Response.ok(createTokens(credentials)).build();
+        }
+        else throw new NotAuthorizedException("Password do not match username");
     }
 
     @Override
