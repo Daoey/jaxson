@@ -27,7 +27,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
             return;
         }
 
-        if (isLogin(requestedPath)) {
+        if (isLogin(requestedPath) || isRegister(requestedPath)) {
             return;
         }
 
@@ -43,8 +43,10 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
     private boolean isAuthorized(String authorizationHeader) {
         if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) return false;
         String token = authorizationHeader.substring("Bearer".length()).trim();
+
         JwtReader jwtReader = new JwtReader();
-        return jwtReader.isValid(token);
+        Map<String, String> claims = jwtReader.readClaims(token);
+        return "authorization".equals(claims.get("sub"));
     }
 
     private boolean isAuthToken(String path) {
@@ -52,7 +54,6 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
     }
 
     private boolean hasValidRefreshToken(String authorizationHeader) {
-        if (!isAuthorized(authorizationHeader)) return false;
 
         String token = authorizationHeader.substring("Bearer".length()).trim();
         JwtReader jwtReader = new JwtReader();
@@ -63,5 +64,9 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
     private boolean isLogin(String resource) {
         return "login".equals(resource);
+    }
+
+    private boolean isRegister(String resource) {
+        return "register".equals(resource);
     }
 }

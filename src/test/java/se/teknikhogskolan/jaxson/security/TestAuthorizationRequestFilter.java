@@ -64,9 +64,12 @@ public class TestAuthorizationRequestFilter {
         
         Response result = client.target(targetUrl).path("register").request()
                 .post(Entity.entity(new Credentials("username", "password"), MediaType.APPLICATION_JSON));
+
         String responseAsString = result.readEntity(String.class);
+
         JSONObject jsonObj = new JSONObject(responseAsString);
-        token = "Bearer " + jsonObj.getString("token");
+        System.out.println(jsonObj);
+//        token = "Bearer " + jsonObj.get
     }
 
     @Test

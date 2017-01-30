@@ -1,5 +1,6 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
+import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.BadRequestException;
@@ -38,7 +39,10 @@ public final class SecurityResourceImpl implements SecurityResource {
 
     @Override
     public Response authenticateUser(Credentials credentials) {
-        if (secureUserService.isValid(credentials.getUsername(), credentials.getPassword())) {
+        if (secureUserService.usernameIsAvailable(credentials.getUsername())) {
+            throw new NotAuthorizedException("No such user");
+        }
+        if (secureUserService.passwordMatchesUser(credentials.getPassword(), credentials.getUsername())) {
             return Response.ok(createTokens(credentials)).build();
         }
         else throw new NotAuthorizedException("Password do not match username");
