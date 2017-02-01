@@ -20,10 +20,10 @@ public class AuthorizationResponseFilter implements ContainerResponseFilter {
             Map<String, String> claims = getClaims(authorizationHeader);
 
             JwtHelper jwtHelper = new JwtHelper();
-            Token token = jwtHelper.generateAuthorizationToken(claims.get("username"));
+            Token token = jwtHelper.generateAccessToken(claims.get("username"));
 
-            responseContext.getHeaders().add("authorization-token", token.getToken());
-            responseContext.getHeaders().add("authorization-token-expires", token.getExpirationTime());
+            responseContext.getHeaders().add("access-token", token.getToken());
+            responseContext.getHeaders().add("access-token-expires", token.getExpirationTime());
         }
     }
 

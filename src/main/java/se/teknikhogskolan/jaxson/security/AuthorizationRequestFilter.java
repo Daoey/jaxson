@@ -46,7 +46,7 @@ public class AuthorizationRequestFilter implements ContainerRequestFilter {
 
         JwtReader jwtReader = new JwtReader();
         Map<String, String> claims = jwtReader.readClaims(token);
-        return "authorization".equals(claims.get("sub"));
+        return "access".equals(claims.get("sub"));
     }
 
     private boolean isAuthToken(String path) {

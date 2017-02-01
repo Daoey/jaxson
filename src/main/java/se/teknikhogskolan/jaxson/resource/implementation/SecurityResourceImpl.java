@@ -1,6 +1,5 @@
 package se.teknikhogskolan.jaxson.resource.implementation;
 
-import com.sun.org.apache.bcel.internal.generic.IF_ACMPEQ;
 import java.util.HashMap;
 import java.util.Map;
 import javax.ws.rs.BadRequestException;
@@ -32,7 +31,7 @@ public final class SecurityResourceImpl implements SecurityResource {
     private Map<String, Token> createTokens(Credentials credentials) {
         JwtHelper helper = new JwtHelper();
         Map<String, Token> tokens = new HashMap<>();
-        tokens.put("authorization token", helper.generateAuthorizationToken(credentials.getUsername()));
+        tokens.put("access token", helper.generateAccessToken(credentials.getUsername()));
         tokens.put("refresh token", helper.generateRefreshToken(credentials.getUsername()));
         return tokens;
     }
@@ -65,6 +64,6 @@ public final class SecurityResourceImpl implements SecurityResource {
         }
 
         JwtHelper jwtHelper = new JwtHelper();
-        return Response.ok(jwtHelper.generateAuthorizationToken(username)).build();
+        return Response.ok(jwtHelper.generateAccessToken(username)).build();
     }
 }
